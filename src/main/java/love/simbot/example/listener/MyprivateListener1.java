@@ -44,7 +44,7 @@ public class MyprivateListener1 {
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String img = util.toCat("image", true, "file="
-                + "http://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-1184240239-588C5FFE182E2972466B8B2403F76CBC/0?term&#61;2");
+                + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-1184240239-588C5FFE182E2972466B8B2403F76CBC/0?term&#61;2");
 
         //将信息存入日志
         Writing writer = new Writing();

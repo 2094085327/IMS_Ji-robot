@@ -1,6 +1,5 @@
 package love.simbot.example.listener.ClassBox;
 
-import catcode.CatCodeUtil;
 import cn.hutool.http.HttpUtil;
 import net.sf.json.JSONObject;
 import org.json.JSONArray;
@@ -76,70 +75,6 @@ public class API {
     // 青年大学习API
     public String YouthStudy() {
         return HttpUtil.createGet("https://api.klizi.cn/API/other/youth.php").execute().body();
-    }
-
-    // 天气查询API
-    public String Weather(String Msg) {
-        String URL = "https://api.klizi.cn/API/other/tianqi_c.php?msg=" + Msg;
-
-        // 尝试获取数据，当输入错误时返回提示
-        try {
-            String jsonStr = HttpUtil.get(URL);
-
-            // 获取城市
-            JSONObject jsonObject = JSONObject.fromObject(jsonStr);
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONObject real = data.getJSONObject("real");
-            JSONObject station = real.getJSONObject("station");
-            String province = station.getString("province");
-            String city = station.getString("city");
-            String publish_time = real.getString("publish_time");
-
-            // 获取天气状况
-            JSONObject weather = real.getJSONObject("weather");
-            String temperature = weather.getString("temperature");
-            String temperatureDiff = weather.getString("temperatureDiff");
-            String humidity = weather.getString("humidity");
-            String info = weather.getString("info");
-            String feelst = weather.getString("feelst");
-
-            // 获取风力状况
-            JSONObject wind = real.getJSONObject("wind");
-            String direct = wind.getString("direct");
-            String power = wind.getString("power");
-            String speed = wind.getString("speed");
-
-            // 获取警报状态
-            JSONObject warn = real.getJSONObject("warn");
-            String alert = warn.getString("alert");
-            String issuecontent = warn.getString("issuecontent");
-            String signaltype = warn.getString("signaltype");
-            String signallevel = warn.getString("signallevel");
-            String result0 = "\n----------\n警报：\n\t警告：" + alert + "\n\n\t发布内容：" + issuecontent + "\n\n\t灾害类型："
-                    + signaltype + "\n\n\t灾害等级：" + signallevel;
-
-            // 获取空气质量
-            JSONObject air = data.getJSONObject("air");
-            String aqi = air.getString("aqi");
-            String text = air.getString("text");
-
-            String result = "成功获取 " + province + " " + city + "市 天气状况" + "\n上次更新时间：" + publish_time
-                    + "\n当前天气状况：\n\t温度：" + temperature + "\n\t温差：" + temperatureDiff + "\n\t湿度："
-                    + humidity + "\n\t天气情况：" + info + "\n\t体感温度：" + feelst + "\n----------\n当前风力情况：\n\t风向："
-                    + direct + "\n\t风力：" + power + "\n\t风速：" + speed + "\n----------\n空气状况：\n\t空气质量："
-                    + aqi + "\n\t等级：" + text;
-
-            // 当存在警报信息时合并消息
-            if (!alert.equals("9999")) {
-                result += result0;
-            }
-
-
-            return result;
-        } catch (Exception e) {
-            // 报错时返回
-            return "无量姬没有查询到" + Msg + "的天气哦~ 请输入正确的城市或再试试~";
-        }
     }
 
     // 二刺螈图片
