@@ -222,6 +222,29 @@ public class MyGroupListener1 {
         }
     }
 
+    // 城市地理
+    @OnGroup
+    // 在收到@时调用青年大学习Api进行回复
+    @Filter(value = "{{city}}地理", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(value = "/dl{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void GeoCity(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+
+        Sender sender = msgSender.SENDER;
+
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (!groupInfo.getGroupCode().equals("637384877")) {
+            if (city == null) {
+                sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
+            } else {
+                sender.sendGroupMsg(groupMsg, geoAPI.CityInfo(city));
+                geoAPI.adm1 = null;
+                geoAPI.adm2 = null;
+                geoAPI.id = null;
+            }
+        }
+    }
+
     // 二刺螈模块 
     @OnGroup
     // 在收到@时调用P站Api进行链接发送

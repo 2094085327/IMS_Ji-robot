@@ -19,8 +19,8 @@ public class GeoAPI {
 
     public String CityInfo(String city) {
         try {
-
-
+            city = city.replace((char) 12288, ' ');    // 将中文空格替换为英文空格
+            city = city.trim();
             String URL = "https://geoapi.qweather.com/v2/city/lookup?location=" + city + "&key=1b48b4a69c8a4f7cb17674cbf4cea29b";
             String jsonStr = HttpUtil.get(URL);
             JSONObject object = JSONObject.fromObject(jsonStr);
@@ -32,9 +32,37 @@ public class GeoAPI {
             this.adm1 = jsonArray.getJSONObject(0).getString("adm1");
             this.adm2 = jsonArray.getJSONObject(0).getString("adm2");
             this.id = jsonArray.getJSONObject(0).getString("id");
-            return jsonArray.getJSONObject(0).getString("id");
+
+            String cityName = jsonArray.getJSONObject(0).getString("name");// 城市名称
+            String cityCountry = jsonArray.getJSONObject(0).getString("country"); // 所属国家
+            float cityLat = Float.parseFloat(jsonArray.getJSONObject(0).getString("lat"));// 维度
+            float cityLon = Float.parseFloat(jsonArray.getJSONObject(0).getString("lon"));// 经度
+
+            String cityTz = jsonArray.getJSONObject(0).getString("tz");// 时区
+            String cityType = jsonArray.getJSONObject(0).getString("type");// 城市地区的属性
+            String cityLonChange;
+            String cityLatChange;
+            if (cityLon < 0) {
+                cityLon = -cityLon;
+                cityLonChange = cityLon + "°W";
+            } else {
+                cityLonChange = cityLon + "°E";
+            }
+
+            if (cityLat < 0) {
+                cityLat = -cityLat;
+                cityLatChange = cityLat + "°S";
+            } else {
+                cityLatChange = cityLat + "°N";
+            }
+
+            return "城市名称:" + cityName + "\n城市ID:" + id + "\n所属国家:" + cityCountry
+                    + "\n上级行政区划:" + adm1 + "\n所属一级行政区划:" + adm2
+                    + "\n城市经纬度:\n" + cityLatChange + "\n" + cityLonChange + "\n时区:"
+                    + cityTz + "\n城市地区属性:" + cityType;
         } catch (Exception e) {
-            return null;
+            return "姬姬没有找到" + city + "的地理呢，要不换一个试试";
+
         }
     }
 
@@ -111,8 +139,5 @@ public class GeoAPI {
         return "姬姬温馨提示：" + text;
     }
 
-    public String GeoCity() {
-        return  null;
-    }
 }
 

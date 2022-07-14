@@ -60,7 +60,7 @@ public class MyprivateListener1 {
                 @Override
                 public void run() {
 
-                    sender.sendPrivateMsg(msg, api.result(msg.getMsg()));
+                    sender.sendPrivateMsg(msg, api.result(msg.getText()));
                     sender.sendPrivateMsg(msg, img);
                 }
             };
