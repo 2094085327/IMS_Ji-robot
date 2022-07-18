@@ -83,22 +83,28 @@ public class API {
         String url = "";
         switch (random) {
             case 0:
-                url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝&r18=1";
+                url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝";
                 break;
             case 1:
             case 2:
                 url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝";
                 break;
+            default:
         }
+        try {
 
-        String jsonStr = HttpUtil.get(url);
-        JSONObject object = JSONObject.fromObject(jsonStr);
-        String data = object.getString("data");
-        JSONArray jsonArray;
-        jsonArray = new JSONArray(data);
-        System.out.println(jsonArray.getJSONObject(0).getJSONObject("urls"));
 
-        return jsonArray.getJSONObject(0).getJSONObject("urls").getString("original");
+            String jsonStr = HttpUtil.get(url);
+            JSONObject object = JSONObject.fromObject(jsonStr);
+            String data = object.getString("data");
+            JSONArray jsonArray;
+            jsonArray = new JSONArray(data);
+            System.out.println(jsonArray.getJSONObject(0).getJSONObject("urls"));
+
+            return jsonArray.getJSONObject(0).getJSONObject("urls").getString("original");
+        } catch (Exception e) {
+            return "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2";
+        }
     }
 
 }

@@ -5,14 +5,18 @@ import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Listen;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.BotInfo;
+import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
+import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.simbot.example.listener.ClassBox.API;
 import love.simbot.example.listener.ClassBox.TimeTranslate;
 import love.simbot.example.listener.ClassBox.Writing;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zeng
@@ -21,10 +25,25 @@ import java.util.TimerTask;
  */
 @Beans
 public class MyprivateListener1 {
-    //复读私聊消息
+    public static ExecutorService THREAD_POOL;
+
+    /**
+     * 复读私聊消息
+     *
+     * @param msg       私聊消息获取
+     * @param sender    构建发送器
+     * @param msgSender 消息SENDER GETTER SETTER
+     */
     @Listen(PrivateMsg.class)
-    public void fudu(PrivateMsg msg, Sender sender) {
-        Timer timer = new Timer();//用于创建延时对话
+    public void fudu(PrivateMsg msg, Sender sender, MsgSender msgSender) {
+
+        // 创建线程池
+        THREAD_POOL = new ThreadPoolExecutor(50, 50, 100000,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+            Thread thread = new Thread(r);
+            thread.setName(String.format("newThread%d", thread.getId()));
+            return thread;
+        });
 
         AccountInfo accountInfo = msg.getAccountInfo();//获取私信人信息
         BotInfo botInfo = msg.getBotInfo();//获取机器人信息
@@ -44,8 +63,7 @@ public class MyprivateListener1 {
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String img = util.toCat("image", true, "file="
-                + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-1184240239-588C5FFE182E2972466B8B2403F76CBC/0?term&#61;2");
-
+                + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-746385872-8246287FAB0F39E42CB2EDEF38E9C700/0?term&#61;2");
         //将信息存入日志
         Writing writer = new Writing();
         writer.write(personMsg + "\n");
@@ -56,15 +74,24 @@ public class MyprivateListener1 {
             sender.sendPrivateMsg(msg, "嗨！");
 
         } else {
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
 
-                    sender.sendPrivateMsg(msg, api.result(msg.getText()));
-                    sender.sendPrivateMsg(msg, img);
+            THREAD_POOL.execute(() -> {
+                sender.sendPrivateMsg(msg, api.result(msg.getText()));
+                // 获取消息的flag
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, img).get();
+
+                System.out.println(flag);
+                // 通过flag撤回消息
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            };
-            timer.schedule(timerTask, 3000);
+
+                msgSender.SETTER.setMsgRecall(flag);
+            });
+
         }
     }
 }

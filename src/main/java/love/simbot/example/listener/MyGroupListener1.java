@@ -19,7 +19,9 @@ import love.simbot.example.listener.ClassBox.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 public class MyGroupListener1 implements Constant {
 
     String personId1 = "2094085327";
+
+    public static ExecutorService THREAD_POOL;
 
     /**
      * 获取当前时间
@@ -318,6 +322,7 @@ public class MyGroupListener1 implements Constant {
     public void picture(GroupMsg groupMsg, MsgSender msgSender) {
 
         Sender sender = msgSender.SENDER;
+        Setter setter = msgSender.SETTER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
 
@@ -328,7 +333,26 @@ public class MyGroupListener1 implements Constant {
         // 将群号为“637384877”的群排除在人工智能答复模块外
         if (!groupInfo.getGroupCode().equals(GROUPID2)) {
             sender.sendGroupMsg(groupMsg, url);
-            sender.sendGroupMsg(groupMsg, img);
+
+
+            MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                    flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
+
+            System.out.println(flag);
+
+
+            //用于创建延时对话
+            Timer timer = new Timer();
+
+            // 延迟45秒发送消息
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    // 通过flag撤回消息
+                    setter.setMsgRecall(flag);
+                }
+            };
+            timer.schedule(timerTask, 45000);
 
         }
     }
@@ -437,6 +461,14 @@ public class MyGroupListener1 implements Constant {
                 + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n");
 
         if (groupInfo.getGroupCode().equals(GROUPID2)) {
+            THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                    TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+                Thread thread = new Thread(r);
+                thread.setName(String.format("newThread%d", thread.getId()));
+                return thread;
+            });
+            THREAD_POOL.execute(() -> {
+            });
 
             //用于创建延时对话
             Timer timer = new Timer();
