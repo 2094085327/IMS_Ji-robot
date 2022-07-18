@@ -10,6 +10,10 @@ import java.util.Date;
  */
 //时间戳转换类
 public class TimeTranslate {
+    /**
+     *
+     * @return
+     */
     public String tt() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date time1 = new Date();

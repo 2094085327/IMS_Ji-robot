@@ -19,6 +19,7 @@ import love.simbot.example.listener.ClassBox.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,148 +28,191 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Beans
-public class MyGroupListener1 {
+public class MyGroupListener1 implements Constant {
 
-    // 获取当前时间
+    String personId1 = "2094085327";
+
+    /**
+     * 获取当前时间
+     */
     public TimeTranslate time = new TimeTranslate();
 
 
-    // 注入得到一个消息构建器工厂。
+    /**
+     * 注入得到一个消息构建器工厂
+     */
     @Depend
     private MessageContentBuilderFactory messageBuilderFactory;
 
-    public String cat1 = "[CAT:at,all=true]";// @全体成员的猫猫码
-    public API api = new API();// 调用API接口的类
-    public GeoAPI geoAPI = new GeoAPI();// 调用API接口的类
+    /**
+     * #@全体成员的猫猫码
+     */
+    public String cat1 = "[CAT:at,all=true]";
+
+    /**
+     * 调用API接口的类
+     */
+    public API api = new API();
+
+    /**
+     * 调用API接口的类
+     */
+    public GeoAPI geoApi = new GeoAPI();
 
 
     @OnGroup
-    public void Group(GroupMsg groupMsg, MsgSender msgSender) {
+    public void group(GroupMsg groupMsg, MsgSender msgSender) {
 
         Sender sender = msgSender.SENDER;
 
-        GroupAccountInfo accountInfo = groupMsg.getAccountInfo();// 群成员信息
-        GroupInfo groupInfo = groupMsg.getGroupInfo();// 群信息
-        String PersonId = accountInfo.getAccountCode();// 获取群成员ID
-        String GroupId = groupInfo.getGroupCode();// 获取群号
-
+        // 群成员信息
+        GroupAccountInfo accountInfo = groupMsg.getAccountInfo();
+        // 群信息
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        // 获取群成员ID
+        String personId = accountInfo.getAccountCode();
+        // 获取群号
+        String groupId = groupInfo.getGroupCode();
         // 根据不同群号向不同人发送消息
-        switch (GroupId) {
-            case "1019170385":
-                if (PersonId.equals("2094085327")) {
+        switch (groupId) {
+            case GROUPID1:
+                if (personId1.equals(personId)) {
                     break;
                 }
 
             case "140469072":
-                if (PersonId.equals("2094085327")) {
+                if (personId1.equals(personId)) {
                     break;
                 }
 
             case "1043409458":
-                if (groupMsg.getMsg().equals("这群里的机器人，难道只会复读？") ||
-                        groupMsg.getMsg().equals("复读、复读、除了复读你们还会什么？")) {
+                if (SENTENCE1.equals(groupMsg.getMsg()) ||
+                        SENTENCE5.equals(groupMsg.getMsg())) {
                     sender.sendGroupMsg(groupMsg, "无量姬还会看好康的");
                     sender.sendGroupMsg(groupMsg, "来点好康的");
-                    //sender.sendGroupMsg(groupMsg, "[CAT:at,code=192444746]"+"看看美女");
                 }
-                if (groupMsg.getMsg().equals("除了复读，你们一无是处！")) {
+                if (SENTENCE2.equals(groupMsg.getMsg())) {
                     sender.sendGroupMsg(groupMsg, "除了复读，无量姬还会看好康的");
                     sender.sendGroupMsg(groupMsg, "来点好康的");
                 }
-                if (groupMsg.getMsg().equals("我才不要和一群复读机呆在一起，\uD83E\uDD2C") ||
-                        groupMsg.getMsg().equals("我好难过，居然和一群只会复读的机器人呆在一起，呜呜呜~~~~~")) {
+                if (SENTENCE3.equals(groupMsg.getMsg()) ||
+                        "我好难过，居然和一群只会复读的机器人呆在一起，呜呜呜~~~~~".equals(groupMsg.getMsg())) {
                     sender.sendGroupMsg(groupMsg, "那就和涩图在一起吧！");
                     sender.sendGroupMsg(groupMsg, "来点好康的");
                 }
-                if (groupMsg.getMsg().equals("群里的衰败，和你们的复读有很大关系。")) {
+                if (SENTENCE4.equals(groupMsg.getMsg())) {
                     sender.sendGroupMsg(groupMsg, "就是说，肯定是涩图看少了，所以...");
                     sender.sendGroupMsg(groupMsg, "来点好康的");
                 }
+                break;
+            default:
 
-                //sender.sendGroupMsg(groupMsg, "[CAT:at,code=192444746]"+"看看美女");
         }
         // 获取时间
         String format1 = time.tt();
 
         // 在控制台输出信息
-        String GroupMsg = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
+        String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
                 + accountInfo.getAccountCode() + "]在群[" + groupInfo.getGroupCode()
                 + "][" + groupInfo.getGroupName() + "]发送了信息：" + groupMsg.getMsg();
-        System.out.println(GroupMsg);
+        System.out.println(groupMsgPutOut);
 
         // 将信息存入日志
         Writing writing = new Writing();
-        writing.write(GroupMsg + "\n");
+        writing.write(groupMsgPutOut + "\n");
     }
 
-    // 解除禁言模块
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
-    // @Filter() 注解为消息过滤器
     @Filter(atBot = true, value = "禁言解除", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void RemoveBan(GroupMsg groupMsg, MsgSender msgSender) {
+    public void removeBan(GroupMsg groupMsg, MsgSender msgSender) {
         Setter setter = msgSender.SETTER;
 
         // 获取群信息-群号
         GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String GroupId = groupInfo.getGroupCode();
+        String groupId = groupInfo.getGroupCode();
 
-        if (GroupId.equals("1019170385")) {
-            setter.setGroupBan("1019170385", "1591461730", 0, TimeUnit.MINUTES);
-            setter.setGroupBan("1019170385", "2807802317", 0, TimeUnit.MINUTES);
-            setter.setGroupBan("1019170385", "2057000856", 0, TimeUnit.MINUTES);
+        if (groupId.equals(GROUPID1)) {
+            setter.setGroupBan(GROUPID1, "1591461730", 0, TimeUnit.MINUTES);
+            setter.setGroupBan(GROUPID1, "2807802317", 0, TimeUnit.MINUTES);
+            setter.setGroupBan(GROUPID1, "2057000856", 0, TimeUnit.MINUTES);
         }
 
-        if (GroupId.equals("695525945")) {
-            setter.setGroupBan("695525945", "1624158591", 0, TimeUnit.MINUTES);
+        if (groupId.equals(GROUPID2)) {
+            setter.setGroupBan(GROUPID2, "1624158591", 0, TimeUnit.MINUTES);
         }
     }
 
-    //请求@全体成员模块
+    /**
+     * 请求@全体成员模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
     @Filter(value = "请求@全体成员", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void AtAll(GroupMsg groupMsg, MsgSender msgSender) {
+    public void atAll(GroupMsg groupMsg, MsgSender msgSender) {
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String GroupId = groupInfo.getGroupCode();
+        String groupId = groupInfo.getGroupCode();
 
-        if (GroupId.equals("1019170385")) {
+        if (groupId.equals(GROUPID1)) {
             sender.sendGroupMsg("1019170385", cat1);
         }
 
-        if (GroupId.equals("695525945")) {
+        if (groupId.equals(GROUPID2)) {
             sender.sendGroupMsg("695525945", cat1);
         }
     }
 
-    //@bot禁言模块
+    /**
+     * #@bot禁言模块
+     * 通过正则表达是匹配禁言时间
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
-    // 通过正则表达是匹配禁言时间
     @Filter(atBot = true, value = "禁言*{{time,\\d+}}分钟", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void AtBot(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("time") String time) {
+    public void atBot(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("time") String time) {
         Setter setter = msgSender.SETTER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String GroupId = groupInfo.getGroupCode();
+        String groupId = groupInfo.getGroupCode();
 
-        if (GroupId.equals("1019170385")) {
-            if (time.equals("5")) {
-                setter.setGroupBan("1019170385", "2057000856", 5, TimeUnit.MINUTES);
+        if (groupId.equals(GROUPID1)) {
+            String banTime1 = "5";
+            if (banTime1.equals(time)) {
+                setter.setGroupBan(GROUPID1, "2057000856", 5, TimeUnit.MINUTES);
 
             } else {
-                setter.setGroupBan("1019170385", "1591461730", Long.parseLong(time), TimeUnit.MINUTES);
-                setter.setGroupBan("1019170385", "2807802317", Long.parseLong(time), TimeUnit.MINUTES);
+                setter.setGroupBan(GROUPID1, "1591461730", Long.parseLong(time), TimeUnit.MINUTES);
+                setter.setGroupBan(GROUPID1, "2807802317", Long.parseLong(time), TimeUnit.MINUTES);
             }
         }
-        if (GroupId.equals("695525945")) {
+        if (groupId.equals(GROUPID2)) {
             setter.setGroupBan("695525945", "1624158591", Long.parseLong(time), TimeUnit.MINUTES);
         }
     }
 
-    // 人工智能回复模块
+
+    /**
+     * 人工智能回复模块
+     * 在收到@时调用人工智能Api进行回复
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
-    // 在收到@时调用人工智能Api进行回复
     @Filter(atBot = true)
-    public void Chat(GroupMsg groupMsg, MsgSender msgSender) {
+    public void chat(GroupMsg groupMsg, MsgSender msgSender) {
 
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
@@ -177,79 +221,101 @@ public class MyGroupListener1 {
                 && !msg.contains("@全体成员") && !msg.contains("来点好康的")
                 && !msg.contains("看看动漫") && !msg.contains("来点原神")) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals("637384877")) {
+            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
                 sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
             }
         }
     }
 
-    // 青年大学习模块
+    /**
+     * 青年大学习模块
+     * 在收到@时调用青年大学习Api进行回复
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
-    // 在收到@时调用青年大学习Api进行回复
     @Filter(atBot = true, value = "青年大学习", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void YouthStudy(GroupMsg groupMsg, MsgSender msgSender) {
+    public void youthStudy(GroupMsg groupMsg, MsgSender msgSender) {
 
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals("637384877")) {
+        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
             sender.sendGroupMsg(groupMsg, api.YouthStudy());
 
         }
     }
 
-    // 天气查询模块
+    /**
+     * 天气查询模块
+     * 在检测到关键词和命令后调用天气API来显示天气
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     * @param city      将通过正则匹配到的关键词城市传递给天气api
+     */
     @OnGroup
-    // 在收到@时调用青年大学习Api进行回复
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void YouthStudy(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
 
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals("637384877")) {
+        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
             if (city == null) {
                 sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
             } else {
-                sender.sendGroupMsg(groupMsg, geoAPI.WeatherInfo(city));
-                geoAPI.adm1 = null;
-                geoAPI.adm2 = null;
-                geoAPI.id = null;
+                sender.sendGroupMsg(groupMsg, geoApi.WeatherInfo(city));
+                geoApi.adm1 = null;
+                geoApi.adm2 = null;
+                geoApi.id = null;
             }
         }
     }
 
-    // 城市地理
+    /**
+     * 城市地理信息查询模块
+     * 在检测到关键词和命令后调用地理API来显示天气
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     * @param city      将通过正则匹配到的关键词城市传递给地理api
+     */
     @OnGroup
-    // 在收到@时调用青年大学习Api进行回复
     @Filter(value = "{{city}}地理", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/dl{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void GeoCity(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+    public void geoCity(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
 
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals("637384877")) {
+        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
             if (city == null) {
                 sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
             } else {
-                sender.sendGroupMsg(groupMsg, geoAPI.CityInfo(city));
-                geoAPI.adm1 = null;
-                geoAPI.adm2 = null;
-                geoAPI.id = null;
+                sender.sendGroupMsg(groupMsg, geoApi.CityInfo(city));
+                geoApi.adm1 = null;
+                geoApi.adm2 = null;
+                geoApi.id = null;
             }
         }
     }
 
-    // 二刺螈模块 
+    /**
+     * 二刺螈模块
+     * 在收到@时调用P站Api进行链接发送
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
-    // 在收到@时调用P站Api进行链接发送
     @Filter(value = "来点好康的", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void Picture(GroupMsg groupMsg, MsgSender msgSender) {
+    public void picture(GroupMsg groupMsg, MsgSender msgSender) {
 
         Sender sender = msgSender.SENDER;
 
@@ -257,28 +323,34 @@ public class MyGroupListener1 {
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String url = api.TwoDimensional();
-        String msg = util.toCat("image", true, "file=" + url);
+        String img = util.toCat("image", true, "file=" + url);
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals("637384877")) {
+        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
             sender.sendGroupMsg(groupMsg, url);
-            sender.sendGroupMsg(groupMsg, msg);
+            sender.sendGroupMsg(groupMsg, img);
 
         }
     }
 
-    // 二刺螈模块2
+    /**
+     * 二刺螈模块2
+     * 在收到@时调用动漫网址来发送图片
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
     @Filter(atBot = true, value = "看看动漫", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void Picture2(GroupMsg groupMsg, MsgSender msgSender) {
+    public void picture2(GroupMsg groupMsg, MsgSender msgSender) {
         CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String msg = util.toCat("image", true, "file=" + "https://www.dmoe.cc/random.php");
-        //String msg=util.toCat("image", true, "file="+ "https://imgapi.xl0408.top");
+        String msg = util.toCat("image", true, "file="
+                + "https://www.dmoe.cc/random.php");
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals("637384877")) {
+            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
 
                 sender.sendGroupMsg(groupMsg, msg);
             }
@@ -287,20 +359,25 @@ public class MyGroupListener1 {
         }
     }
 
-
-    // 原神图片api
+    /**
+     * 原神图片api
+     * 在收到@时调用原神图片api来发送图片
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
     @OnGroup
     @Filter(atBot = true, value = "来点原神", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void YuanShen(GroupMsg groupMsg, MsgSender msgSender) {
+    public void yuanShen(GroupMsg groupMsg, MsgSender msgSender) {
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String msg = util.toCat("image", true, "file="
                 + "https://api.dujin.org/pic/yuanshen/");
-        //String msg=util.toCat("image", true, "file="+ "https://imgapi.xl0408.top");
+
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals("637384877")) {
+            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
 
                 sender.sendGroupMsg(groupMsg, msg);
             }
@@ -309,7 +386,13 @@ public class MyGroupListener1 {
         }
     }
 
-    // 群加入申请
+    /**
+     * 群加入申请
+     *
+     * @param groupAddRequest 用于获取群加入申请的请求
+     * @param msgSender       用于在群聊中发送消息
+     * @param groupMsg        用于获取群聊消息，群成员信息等
+     */
     @OnGroupAddRequest
     public void onRequest(GroupAddRequest groupAddRequest, MsgSender msgSender, GroupMsg groupMsg) {
 
@@ -322,12 +405,17 @@ public class MyGroupListener1 {
 
         // 将入群信息存入日志
         PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.writeRequest("[" + format1 + "][" + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
-                + "]申请加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n");
-
+        peopleChangeWrite.writeRequest("[" + format1 + "][" + accountInfo.getAccountNickname()
+                + "--" + accountInfo.getAccountCode() + "]申请加入群聊：[" + groupInfo.getGroupCode()
+                + "/" + groupInfo.getGroupName() + "]" + "\n");
     }
 
-    // 入群欢迎模块
+    /**
+     * 入群欢迎模块
+     *
+     * @param groupMemberIncrease 群成员增加信息
+     * @param msgSender           用于在群聊中发送消息
+     */
     @OnGroupMemberIncrease
     public void memberIncrease(GroupMemberIncrease groupMemberIncrease, MsgSender msgSender) {
 
@@ -348,23 +436,15 @@ public class MyGroupListener1 {
         peopleChangeWrite.writeIncrease("[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
                 + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n");
 
-        if (groupInfo.getGroupCode().equals("637384877")) {
-            Timer timer = new Timer();//用于创建延时对话
+        if (groupInfo.getGroupCode().equals(GROUPID2)) {
 
-            // 假设我们的迎新消息是这样的：
-            //@xxx 欢迎入群！
-            MessageContent msg = builder
-                    // at当事人
-                    .at(accountInfo)
-                    // tips 通过 \n 换行
-                    .text(" 欢迎加入！")
-                    .build();
+            //用于创建延时对话
+            Timer timer = new Timer();
 
             // 延迟45秒发送消息
             TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
-                    // sender.sendGroupMsg(groupInfo, msg);
 
                 }
             };
@@ -372,7 +452,7 @@ public class MyGroupListener1 {
 
         }
 
-        if (groupInfo.getGroupCode().equals("695525945")) {
+        if (groupInfo.getGroupCode().equals(GROUPID2)) {
 
             MessageContent msg1 = builder
                     // at当事人
@@ -380,10 +460,12 @@ public class MyGroupListener1 {
                     // tips 通过 \n 换行
                     .text(" 欢迎入群！")
                     .build();
-
-            String cat2 = "[CAT:face,id=277]";// 通过猫猫码发送表情
-            String msg2 = " 请看置顶消息！如果没有就当我没说";//消息
-            String msg3 = "请及时修改昵称!";//消息
+            // 通过猫猫码发送表情
+            String cat2 = "[CAT:face,id=277]";
+            //消息
+            String msg2 = " 请看置顶消息！如果没有就当我没说";
+            //消息
+            String msg3 = "请及时修改昵称!";
 
 
             // 发送消息
@@ -392,7 +474,7 @@ public class MyGroupListener1 {
             sender.sendGroupMsg(groupInfo, msg3);
         }
 
-        if (groupInfo.getGroupCode().equals("1043409458")) {
+        if (groupInfo.getGroupCode().equals(GROUPID1)) {
 
             MessageContent msg = builder
                     // at当事人
@@ -412,7 +494,11 @@ public class MyGroupListener1 {
 
     }
 
-    // 群成员减少监听
+    /**
+     * 群成员减少事件监听
+     *
+     * @param groupMemberReduce 群成员减少信息
+     */
     @OnGroupMemberReduce
     public void memberReduce(GroupMemberReduce groupMemberReduce) {
 
@@ -432,7 +518,11 @@ public class MyGroupListener1 {
                 + "]退出群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]--" + "\n");
     }
 
-    // 好友增加事件
+    /**
+     * 好友增加事件
+     *
+     * @param friendIncrease 好友增加信息
+     */
     @OnFriendIncrease
     public void friendIncrease(FriendIncrease friendIncrease) {
         AccountInfo accountInfo = friendIncrease.getAccountInfo();
@@ -442,14 +532,20 @@ public class MyGroupListener1 {
 
         // 将人员信息存入日志
         PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.writeReduce("[" + format1 + "]你已同意[" + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
+        peopleChangeWrite.writeReduce("[" + format1 + "]你已同意["
+                + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
                 + "]成为好友" + "\n");
 
-        System.out.println("--[" + format1 + "]--你已同意[" + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
+        System.out.println("--[" + format1 + "]--你已同意[" + accountInfo.getAccountNickname()
+                + "--" + accountInfo.getAccountCode()
                 + "]成为好友--" + "\n");
     }
 
-    // 好友减少事件
+    /**
+     * 好友减少事件
+     *
+     * @param friendReduce 好友减少信息
+     */
     @OnFriendReduce
     public void friendReduce(FriendReduce friendReduce) {
         AccountInfo accountInfo = friendReduce.getAccountInfo();
@@ -467,7 +563,11 @@ public class MyGroupListener1 {
 
     }
 
-    // 好友申请事件
+    /**
+     * 好友申请事件
+     *
+     * @param friendAddRequest 好友增加信息
+     */
     @OnFriendAddRequest
     public void friendRequest(FriendAddRequest friendAddRequest) {
         AccountInfo accountInfo = friendAddRequest.getAccountInfo();
@@ -477,10 +577,12 @@ public class MyGroupListener1 {
 
         // 将人员信息存入日志
         PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.friendRequest("[" + format1 + "][" + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
+        peopleChangeWrite.friendRequest("[" + format1 + "]["
+                + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
                 + "]申请成为你的好友" + "\n");
 
-        System.out.println("--[" + format1 + "][" + accountInfo.getAccountNickname() + "--" + accountInfo.getAccountCode()
+        System.out.println("--[" + format1 + "][" + accountInfo.getAccountNickname()
+                + "--" + accountInfo.getAccountCode()
                 + "]申请成为你的好友--" + "\n");
 
     }
