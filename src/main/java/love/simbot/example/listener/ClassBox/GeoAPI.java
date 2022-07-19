@@ -81,7 +81,8 @@ public class GeoAPI {
         // 调用城市地理信息方法以获取城市id
         CityInfo(city);
 
-        String URL = "https://devapi.qweather.com/v7/weather/now?location=" + id + "&key=1b48b4a69c8a4f7cb17674cbf4cea29b";
+        String URL = "https://devapi.qweather.com/v7/weather/now?location=" + id
+                + "&key=1b48b4a69c8a4f7cb17674cbf4cea29b";
 
         // 获取城市温度信息
         try {
@@ -146,18 +147,24 @@ public class GeoAPI {
 
     // 获取每日天气建议
     public String DailyWeather() {
-        String URL = "https://devapi.qweather.com/v7/indices/1d?type=1,2&location=" + id
-                + "&key=1b48b4a69c8a4f7cb17674cbf4cea29b";
-        String jsonStr = HttpUtil.get(URL);
-        JSONObject object = JSONObject.fromObject(jsonStr);
+        try {
 
-        // 获得名为"daily"的String
-        String daily = object.getString("daily");
-        JSONArray jsonArray;
-        jsonArray = new JSONArray(daily);
 
-        String text = jsonArray.getJSONObject(0).getString("text"); // 日期
-        return "姬姬温馨提示：" + text;
+            String URL = "https://devapi.qweather.com/v7/indices/1d?type=1,2&location=" + id
+                    + "&key=1b48b4a69c8a4f7cb17674cbf4cea29b";
+            String jsonStr = HttpUtil.get(URL);
+            JSONObject object = JSONObject.fromObject(jsonStr);
+
+            // 获得名为"daily"的String
+            String daily = object.getString("daily");
+            JSONArray jsonArray;
+            jsonArray = new JSONArray(daily);
+
+            String text = jsonArray.getJSONObject(0).getString("text"); // 日期
+            return "姬姬温馨提示：" + text;
+        } catch (Exception e) {
+            return "姬姬没有温馨提示";
+        }
     }
 
 }

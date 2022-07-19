@@ -26,8 +26,9 @@ public class API {
         String requestUrl = "https://api.ownthink.com/bot?appid=6b571b31ba3fb3a18c9361738b644a46&spoken=" + message;
 
         // 去除消息中的空格
-        message = message.replace((char) 12288, ' ');    // 将中文空格替换为英文空格
+        // 将中文空格替换为英文空格
         message = message.trim();
+        message = message.replace((char) 12288, ' ');
 
         //请求数据
         //params用于存储请求数据的参数
@@ -36,8 +37,6 @@ public class API {
         params.put("SECRET_KEY", "29af4375c3a146f3adabc3aa56a5eaf0");
         params.put("spoken", message);
         try {
-
-
             //调用HttpUtil.post方法，这个方法主要用于请求地址，并加上请求参数
             String jsonStr = HttpUtil.post(requestUrl, params);
 
@@ -45,7 +44,6 @@ public class API {
             JSONObject jsonObj = JSONObject.fromObject(jsonStr);//从字符串转成java代码
             JSONObject data = jsonObj.getJSONObject("data");
             JSONObject info = data.getJSONObject("info");
-
             return info.getString("text");
         } catch (Exception e) {
 

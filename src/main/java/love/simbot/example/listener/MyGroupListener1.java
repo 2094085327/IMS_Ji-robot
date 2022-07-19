@@ -59,7 +59,7 @@ public class MyGroupListener1 implements Constant {
     public API api = new API();
 
     /**
-     * 调用API接口的类
+     * 调用天气地理API接口的类
      */
     public GeoAPI geoApi = new GeoAPI();
 
