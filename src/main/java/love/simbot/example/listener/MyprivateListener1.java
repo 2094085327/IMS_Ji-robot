@@ -2,21 +2,16 @@ package love.simbot.example.listener;
 
 import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
-import love.forte.simbot.annotation.Filter;
-import love.forte.simbot.annotation.FilterValue;
-import love.forte.simbot.annotation.Listen;
-import love.forte.simbot.annotation.OnPrivate;
+import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.BotInfo;
+import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
-import love.simbot.example.listener.ClassBox.API;
-import love.simbot.example.listener.ClassBox.GeoAPI;
-import love.simbot.example.listener.ClassBox.TimeTranslate;
-import love.simbot.example.listener.ClassBox.Writing;
+import love.simbot.example.listener.ClassBox.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Beans
-public class MyprivateListener1 {
+public class MyprivateListener1 extends Constant {
 
     /**
      * 调用API接口的类
@@ -42,6 +37,49 @@ public class MyprivateListener1 {
     public GeoAPI geoApi = new GeoAPI();
 
     public static ExecutorService THREAD_POOL;
+
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param privateMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnPrivate
+    @Filter(value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateClose(PrivateMsg privateMsg, MsgSender msgSender) {
+        AccountInfo accountInfo = privateMsg.getAccountInfo();
+        String setUser = accountInfo.getAccountCode();
+        if (setUser.equals(USERID1)) {
+            BOOTSTATE = false;
+            System.out.println("已关机");
+            msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬关机了！");
+        } else {
+            msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
+        }
+    }
+
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param privateMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateOpen(PrivateMsg privateMsg, MsgSender msgSender) {
+        AccountInfo accountInfo = privateMsg.getAccountInfo();
+        String setUser = accountInfo.getAccountCode();
+        if (setUser.equals(USERID1)) {
+            BOOTSTATE = true;
+            System.out.println("已开机");
+            msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬开机了！");
+        } else {
+            msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
+        }
+    }
+
 
     /**
      * 监听私聊消息并存入日志
@@ -101,40 +139,41 @@ public class MyprivateListener1 {
             thread.setName(String.format("newThread%d", thread.getId()));
             return thread;
         });
+        if (BOOTSTATE) {
+            CatCodeUtil util = CatCodeUtil.INSTANCE;
+            String img = util.toCat("image", true, "file="
+                    + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-746385872-8246287FAB0F39E42CB2EDEF38E9C700/0?term&#61;2");
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String img = util.toCat("image", true, "file="
-                + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-746385872-8246287FAB0F39E42CB2EDEF38E9C700/0?term&#61;2");
 
+            if (!msgs.contains("天气") && !msgs.contains("青年大学习") && !msgs.contains("禁言")
+                    && !msgs.contains("@全体成员") && !msgs.contains("来点好康的")
+                    && !msgs.contains("看看动漫") && !msgs.contains("来点原神")) {
+                //检测到特定私信内容进行特定回复
+                if ("hi".equals(msg.getMsg()) || "你好".equals(msg.getMsg())) {
 
-        if (!msgs.contains("天气") && !msgs.contains("青年大学习") && !msgs.contains("禁言")
-                && !msgs.contains("@全体成员") && !msgs.contains("来点好康的")
-                && !msgs.contains("看看动漫") && !msgs.contains("来点原神")) {
-            //检测到特定私信内容进行特定回复
-            if ("hi".equals(msg.getMsg()) || "你好".equals(msg.getMsg())) {
+                    sender.sendPrivateMsg(msg, "嗨！");
 
-                sender.sendPrivateMsg(msg, "嗨！");
+                } else {
 
-            } else {
+                    THREAD_POOL.execute(() -> {
+                        sender.sendPrivateMsg(msg, api.result(msg.getText()));
 
-                THREAD_POOL.execute(() -> {
-                    sender.sendPrivateMsg(msg, api.result(msg.getText()));
+                        // 获取消息的flag
+                        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                                flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, img).get();
 
-                    // 获取消息的flag
-                    MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                            flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, img).get();
-
-                    System.out.println(flag);
-                    // 通过flag撤回消息
-                    try {
-                        // 休眠10000ms
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // 撤回操作
-                    msgSender.SETTER.setMsgRecall(flag);
-                });
+                        System.out.println(flag);
+                        // 通过flag撤回消息
+                        try {
+                            // 休眠10000ms
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        // 撤回操作
+                        msgSender.SETTER.setMsgRecall(flag);
+                    });
+                }
             }
         }
     }

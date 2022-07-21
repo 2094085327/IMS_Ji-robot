@@ -21,18 +21,23 @@ public class MyTast {
     public News news = new News();
     static int i = 1;
 
-
-    // 调用每日一言APi
+    /**
+     * 调用每日一言APi
+     */
     public API api = new API();
 
     TimeTranslate time2 = new TimeTranslate();
 
-    // 构建机器人管理器
+    /**
+     * 构建机器人管理器
+     */
     @Depend
     private BotManager manager;
 
-    // 每日一言构建定时器
-    // @Fixed(value = 60, timeUnit = TimeUnit.MINUTES)
+    /**
+     * 每日一言构建定时器
+     * #@Fixed(value = 60, timeUnit = TimeUnit.MINUTES)
+     */
     public void task() {
 
         Bot bot = manager.getBot("341677404");
@@ -51,10 +56,9 @@ public class MyTast {
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String img = util.toCat("image", true, "file="
-                + "http://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-1184240239-588C5FFE182E2972466B8B2403F76CBC/0?term&#61;2");
+                + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-1184240239-588C5FFE182E2972466B8B2403F76CBC/0?term&#61;2");
 
-
-        botSender.SENDER.sendGroupMsg("1043409458", img);// 140469072
+        botSender.SENDER.sendGroupMsg("1043409458", img);
     }
 /**
  // 构建新闻定时器

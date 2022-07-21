@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Beans
-public class MyGroupListener1 implements Constant {
+public class MyGroupListener1 extends Constant {
 
-    String personId1 = "2094085327";
+
 
     public static ExecutorService THREAD_POOL;
 
@@ -79,13 +79,13 @@ public class MyGroupListener1 implements Constant {
         String groupId = groupInfo.getGroupCode();
         // 根据不同群号向不同人发送消息
         switch (groupId) {
-            case GROUPID1:
-                if (personId1.equals(personId)) {
+            case "1019170385":
+                if (USERID1.equals(personId)) {
                     break;
                 }
 
             case "140469072":
-                if (personId1.equals(personId)) {
+                if (USERID1.equals(personId)) {
                     break;
                 }
 
@@ -125,6 +125,49 @@ public class MyGroupListener1 implements Constant {
         Writing writing = new Writing();
         writing.write(groupMsgPutOut + "\n");
     }
+
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(atBot = true, value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateClose(GroupMsg groupMsg, MsgSender msgSender) {
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+        String setUser = accountInfo.getAccountCode();
+        if (setUser.equals(USERID1)) {
+            BOOTSTATE = false;
+            System.out.println("已关机");
+            msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬关机了！");
+        } else {
+            msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+        }
+    }
+
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(atBot = true, value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateOpen(GroupMsg groupMsg, MsgSender msgSender) {
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+        String setUser = accountInfo.getAccountCode();
+        if (setUser.equals(USERID1)) {
+            BOOTSTATE = true;
+            System.out.println("已开机");
+            msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬开机了！");
+        } else {
+            msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+        }
+    }
+
 
     /**
      * 解除禁言模块
@@ -223,9 +266,10 @@ public class MyGroupListener1 implements Constant {
         String msg = groupMsg.getMsg();
         if (!msg.contains("天气") && !msg.contains("青年大学习") && !msg.contains("禁言")
                 && !msg.contains("@全体成员") && !msg.contains("来点好康的")
-                && !msg.contains("看看动漫") && !msg.contains("来点原神")) {
+                && !msg.contains("看看动漫") && !msg.contains("来点原神")
+                && !msg.contains(".关机") && !msg.contains(".开机")) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+            if (!groupInfo.getGroupCode().equals(GROUPID2) && BOOTSTATE) {
                 sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
             }
         }
@@ -264,19 +308,20 @@ public class MyGroupListener1 implements Constant {
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+        if (BOOTSTATE) {
+            Sender sender = msgSender.SENDER;
 
-        Sender sender = msgSender.SENDER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
-            if (city == null) {
-                sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
-            } else {
-                sender.sendGroupMsg(groupMsg, geoApi.WeatherInfo(city));
-                geoApi.adm1 = null;
-                geoApi.adm2 = null;
-                geoApi.id = null;
+            GroupInfo groupInfo = groupMsg.getGroupInfo();
+            // 将群号为“637384877”的群排除在人工智能答复模块外
+            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+                if (city == null) {
+                    sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
+                } else {
+                    sender.sendGroupMsg(groupMsg, geoApi.WeatherInfo(city));
+                    geoApi.adm1 = null;
+                    geoApi.adm2 = null;
+                    geoApi.id = null;
+                }
             }
         }
     }
