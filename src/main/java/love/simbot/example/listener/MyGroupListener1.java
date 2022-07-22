@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 public class MyGroupListener1 extends Constant {
 
 
-
     public static ExecutorService THREAD_POOL;
 
     /**
@@ -570,6 +569,27 @@ public class MyGroupListener1 extends Constant {
                 + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]--" + "\n");
 
     }
+
+
+    /**
+     * 天气查询模块
+     * 在检测到关键词和命令后调用天气API来显示天气
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(value = "检测直播", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void BLive(GroupMsg groupMsg, MsgSender msgSender) {
+
+        Sender sender = msgSender.SENDER;
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+            sender.sendGroupMsg(groupMsg, api.bLive("508141704"));
+        }
+    }
+
 
     /**
      * 群成员减少事件监听

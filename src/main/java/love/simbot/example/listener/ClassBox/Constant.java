@@ -16,7 +16,10 @@ public class Constant {
     public String SENTENCE3 = "我才不要和一群复读机呆在一起，\uD83E\uDD2C";
     public String SENTENCE4 = "群里的衰败，和你们的复读有很大关系。";
     public String SENTENCE5 = "复读、复读、除了复读你们还会什么？";
-    public boolean BOOTSTATE = false;
+    public static boolean BOOTSTATE = true;
+
+    public static String BLIVESTATE = "true";
+    public static String SendTwice = "true";
 
 
 }

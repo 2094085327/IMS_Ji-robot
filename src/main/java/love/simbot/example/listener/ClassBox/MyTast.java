@@ -8,6 +8,9 @@ import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.timer.Cron;
 import love.forte.simbot.timer.EnableTimeTask;
+import love.forte.simbot.timer.Fixed;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zeng
@@ -17,7 +20,7 @@ import love.forte.simbot.timer.EnableTimeTask;
 
 @Beans
 @EnableTimeTask
-public class MyTast {
+public class MyTast extends Constant {
     public News news = new News();
     static int i = 1;
 
@@ -60,6 +63,18 @@ public class MyTast {
 
         botSender.SENDER.sendGroupMsg("1043409458", img);
     }
+
+    @Fixed(value = 30, timeUnit = TimeUnit.SECONDS)
+    public void BLive() {
+        Bot bot = manager.getBot("341677404");
+        BotSender botSender = bot.getSender();
+        if ("false".equals(BLIVESTATE)) {
+            api.bLiveHelp("508141704");
+        }if ("true".equals(BLIVESTATE)){
+            botSender.SENDER.sendGroupMsg("140469072", api.bLive("508141704"));
+        }
+    }
+
 /**
  // 构建新闻定时器
  @Fixed(value = 30, timeUnit = TimeUnit.MINUTES)
