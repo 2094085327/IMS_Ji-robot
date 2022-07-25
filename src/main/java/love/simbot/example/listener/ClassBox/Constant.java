@@ -6,8 +6,11 @@ package love.simbot.example.listener.ClassBox;
  * @user 86188
  */
 public class Constant {
+    public static final String CODE = "code";
     public String GROUPID1 = "1019170385";
     public String GROUPID2 = "695525945";
+    public String GROUPID3 = "637384877";
+    public String GROUPID4 = "707770587";
 
     public String USERID1 = "2094085327";
 
@@ -17,6 +20,8 @@ public class Constant {
     public String SENTENCE4 = "群里的衰败，和你们的复读有很大关系。";
     public String SENTENCE5 = "复读、复读、除了复读你们还会什么？";
     public static boolean BOOTSTATE = true;
+
+    public static String BiUpUid = "546195";
 
     public static String BLIVESTATE = "true";
     public static String SendTwice = "true";

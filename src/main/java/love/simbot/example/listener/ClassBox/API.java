@@ -148,17 +148,17 @@ public class API extends Constant {
             if ("1".equals(liveStatus)) {
                 msg += "直播间正在直播中\n";
                 BLIVESTATE = "false";
-                SendTwice ="false";
+                SendTwice = "false";
                 System.out.println(data);
                 msg += "房间号:" + roomId + "\n房间名:" + title + "\n直播开始时间:" + liveTime;
                 return msg;
             } else {
-                BLIVESTATE ="false";
+                BLIVESTATE = "false";
                 return "";
             }
         } catch (Exception e) {
-            BLIVESTATE ="false";
-            return "";
+            BLIVESTATE = "false";
+            return "没有在直播";
         }
 
     }
@@ -185,14 +185,16 @@ public class API extends Constant {
             String msg = "";
             if ("0".equals(liveStatus)) {
                 BLIVESTATE = "true";
-            } if ("1".equals(liveStatus)){
+            }
+            if ("1".equals(liveStatus)) {
+                BLIVESTATE = "false";
+            } else {
                 BLIVESTATE = "false";
             }
-            else{
-                BLIVESTATE ="false";
-            }
         } catch (Exception e) {
-            BLIVESTATE ="false";
+
+            BLIVESTATE = "false";
+
         }
 
     }

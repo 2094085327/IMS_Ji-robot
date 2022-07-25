@@ -69,9 +69,9 @@ public class MyTast extends Constant {
         Bot bot = manager.getBot("341677404");
         BotSender botSender = bot.getSender();
         if ("false".equals(BLIVESTATE)) {
-            api.bLiveHelp("508141704");
+            api.bLiveHelp(BiUpUid);
         }if ("true".equals(BLIVESTATE)){
-            botSender.SENDER.sendGroupMsg("140469072", api.bLive("508141704"));
+            botSender.SENDER.sendGroupMsg("140469072", api.bLive(BiUpUid));
         }
     }
 

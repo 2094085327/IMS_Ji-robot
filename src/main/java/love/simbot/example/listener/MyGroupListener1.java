@@ -126,7 +126,29 @@ public class MyGroupListener1 extends Constant {
     }
 
     /**
-     * 解除禁言模块
+     * 关机模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(value = "/help", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void help(GroupMsg groupMsg, MsgSender msgSender) {
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
+        String helps = "[无量姬的指令]\n" +
+                "一、含参指令\n" +
+                "1.【天气查询】 : /tq 城市\n(别名:XX天气)\n\n" +
+                "2.【地理查询】 : /dl 城市\n(别名:XX地理)\n\n" +
+                "3.【群友互动】: 后接@人\n " +
+                "   ①/丢   ②/拍   ③/抓\n"+
+                "    ④/抱   ⑤/锤";
+        msgSender.SENDER.sendGroupMsg(groupMsg, helps);
+    }
+
+    /**
+     * 关机模块
      * #@Filter() 注解为消息过滤器
      *
      * @param groupMsg  用于获取群聊消息，群成员信息等
@@ -147,7 +169,7 @@ public class MyGroupListener1 extends Constant {
     }
 
     /**
-     * 解除禁言模块
+     * 开机模块
      * #@Filter() 注解为消息过滤器
      *
      * @param groupMsg  用于获取群聊消息，群成员信息等
@@ -266,9 +288,11 @@ public class MyGroupListener1 extends Constant {
         if (!msg.contains("天气") && !msg.contains("青年大学习") && !msg.contains("禁言")
                 && !msg.contains("@全体成员") && !msg.contains("来点好康的")
                 && !msg.contains("看看动漫") && !msg.contains("来点原神")
-                && !msg.contains(".关机") && !msg.contains(".开机")) {
+                && !msg.contains(".关机") && !msg.contains(".开机") && !msg.contains("/help")
+                && !msg.contains("/丢") && !msg.contains("/拍") && !msg.contains("/抓")
+                && !msg.contains("/抱") && !msg.contains("/锤")) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID2) && BOOTSTATE) {
+            if (!groupInfo.getGroupCode().equals(GROUPID3) && BOOTSTATE) {
                 sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
             }
         }
@@ -289,7 +313,7 @@ public class MyGroupListener1 extends Constant {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
             sender.sendGroupMsg(groupMsg, api.YouthStudy());
 
         }
@@ -312,7 +336,7 @@ public class MyGroupListener1 extends Constant {
 
             GroupInfo groupInfo = groupMsg.getGroupInfo();
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
                 if (city == null) {
                     sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
                 } else {
@@ -342,7 +366,7 @@ public class MyGroupListener1 extends Constant {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
             if (city == null) {
                 sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
             } else {
@@ -375,7 +399,7 @@ public class MyGroupListener1 extends Constant {
         String img = util.toCat("image", true, "file=" + url);
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
             sender.sendGroupMsg(groupMsg, url);
 
 
@@ -418,7 +442,7 @@ public class MyGroupListener1 extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
 
                 sender.sendGroupMsg(groupMsg, msg);
             }
@@ -445,7 +469,7 @@ public class MyGroupListener1 extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID2)) {
+            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
 
                 sender.sendGroupMsg(groupMsg, msg);
             }
@@ -468,14 +492,21 @@ public class MyGroupListener1 extends Constant {
         AccountInfo accountInfo = groupAddRequest.getAccountInfo();
         GroupInfo groupInfo = groupMsg.getGroupInfo();
 
+
         // 获取时间
         String format1 = time.tt();
 
         // 将入群信息存入日志
-        PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.writeRequest("[" + format1 + "][" + accountInfo.getAccountNickname()
+        String msg = "[" + format1 + "][" + accountInfo.getAccountNickname()
                 + "--" + accountInfo.getAccountCode() + "]申请加入群聊：[" + groupInfo.getGroupCode()
-                + "/" + groupInfo.getGroupName() + "]" + "\n");
+                + "/" + groupInfo.getGroupName() + "]\n";
+        PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
+        peopleChangeWrite.writeRequest(msg);
+
+        if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
+                groupInfo.getGroupCode().equals(GROUPID3) || groupInfo.getGroupCode().equals(GROUPID4)) {
+            msgSender.SENDER.sendPrivateMsg("2094085327", msg);
+        }
     }
 
     /**
@@ -501,30 +532,33 @@ public class MyGroupListener1 extends Constant {
 
         // 将入群信息存入日志
         PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.writeIncrease("[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
-                + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n");
+        String msgs = "[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
+                + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]\n";
+        peopleChangeWrite.writeIncrease(msgs);
+        if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
+                groupInfo.getGroupCode().equals(GROUPID3) || groupInfo.getGroupCode().equals(GROUPID4)) {
+            msgSender.SENDER.sendPrivateMsg("2094085327", msgs);
+        }
 
-        if (groupInfo.getGroupCode().equals(GROUPID2)) {
+        // 线程池
+        if (groupInfo.getGroupCode().equals(GROUPID3)) {
             THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
                     TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
                 Thread thread = new Thread(r);
                 thread.setName(String.format("newThread%d", thread.getId()));
                 return thread;
             });
+
+            // 创建延时消息
             THREAD_POOL.execute(() -> {
+                try {
+                    // 线程休眠45秒
+                    Thread.sleep(45000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             });
 
-            //用于创建延时对话
-            Timer timer = new Timer();
-
-            // 延迟45秒发送消息
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-
-                }
-            };
-            timer.schedule(timerTask, 45000);
 
         }
 
@@ -585,8 +619,8 @@ public class MyGroupListener1 extends Constant {
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID2)) {
-            sender.sendGroupMsg(groupMsg, api.bLive("508141704"));
+        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+            sender.sendGroupMsg(groupMsg, api.bLive(BiUpUid));
         }
     }
 
