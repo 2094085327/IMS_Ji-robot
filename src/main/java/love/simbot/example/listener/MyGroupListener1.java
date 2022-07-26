@@ -17,6 +17,7 @@ import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.listener.ClassBox.*;
 
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -142,7 +143,7 @@ public class MyGroupListener1 extends Constant {
                 "1.【天气查询】 : /tq 城市\n(别名:XX天气)\n\n" +
                 "2.【地理查询】 : /dl 城市\n(别名:XX地理)\n\n" +
                 "3.【群友互动】: 后接@人\n " +
-                "   ①/丢   ②/拍   ③/抓\n"+
+                "   ①/丢   ②/拍   ③/抓\n" +
                 "    ④/抱   ⑤/锤";
         msgSender.SENDER.sendGroupMsg(groupMsg, helps);
     }
@@ -335,7 +336,7 @@ public class MyGroupListener1 extends Constant {
             Sender sender = msgSender.SENDER;
 
             GroupInfo groupInfo = groupMsg.getGroupInfo();
-            // 将群号为“637384877”的群排除在人工智能答复模块外
+            // 将群号为“637384877”的群排除在人工智能答复模块外.
             if (!groupInfo.getGroupCode().equals(GROUPID3)) {
                 if (city == null) {
                     sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
@@ -536,7 +537,7 @@ public class MyGroupListener1 extends Constant {
                 + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]\n";
         peopleChangeWrite.writeIncrease(msgs);
         if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
-                groupInfo.getGroupCode().equals(GROUPID3) || groupInfo.getGroupCode().equals(GROUPID4)) {
+                groupInfo.getGroupCode().equals(GROUPID3)) {
             msgSender.SENDER.sendPrivateMsg("2094085327", msgs);
         }
 
@@ -631,22 +632,38 @@ public class MyGroupListener1 extends Constant {
      * @param groupMemberReduce 群成员减少信息
      */
     @OnGroupMemberReduce
-    public void memberReduce(GroupMemberReduce groupMemberReduce) {
+    public void memberReduce(GroupMemberReduce groupMemberReduce, MsgSender msgSender) {
 
-        //入群者信息
+        //退群者信息
         AccountInfo accountInfo = groupMemberReduce.getAccountInfo();
         GroupInfo groupInfo = groupMemberReduce.getGroupInfo();
+
+        // 判断退群方式和获取操作员
+        // 主动退群
+        if (groupMemberReduce.getReduceType().equals(GroupMemberReduce.Type.LEAVE)) {
+            msgSender.SENDER.sendPrivateMsg("2094085327", "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]["
+                    + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是自愿退群的呢，走的时候很安详~");
+        }
+        // 被踢出群聊
+        else {
+            msgSender.SENDER.sendPrivateMsg("2094085327", "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName()
+                    + "][" + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是被["
+                    + Objects.requireNonNull(groupMemberReduce.getOperatorInfo()).getOperatorCode() + "-"
+                    + Objects.requireNonNull(groupMemberReduce.getOperatorInfo()).getOperatorRemarkOrNickname() + "]踢出群聊的呢，走的很不甘心~");
+        }
 
         // 获取时间
         String format1 = time.tt();
 
         // 将入群信息存入日志
         PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        peopleChangeWrite.writeReduce("[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
-                + "]退出群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n");
+        String msg = "[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
+                + "]退出群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]" + "\n";
 
-        System.out.println("--[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
-                + "]退出群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]--" + "\n");
+        peopleChangeWrite.writeReduce(msg);
+
+        // 在控制台输出退群信息
+        System.out.println(msg);
     }
 
     /**
