@@ -1,4 +1,4 @@
-//package love.simbot.example.listener;
+//package love.simbot.example.core.listener;
 //
 //import love.forte.common.ioc.annotation.Beans;
 //import love.forte.common.ioc.annotation.Depend;

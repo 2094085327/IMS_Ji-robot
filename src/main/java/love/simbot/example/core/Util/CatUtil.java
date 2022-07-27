@@ -1,4 +1,4 @@
-package love.simbot.example.listener.ClassBox;
+package love.simbot.example.core.Util;
 
 import catcode.CatCodeUtil;
 import catcode.CodeTemplate;
@@ -11,6 +11,7 @@ import love.forte.simbot.api.message.events.MsgGet;
 import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.sender.Getter;
 import love.simbot.example.core.RobotCore;
+import love.simbot.example.core.listener.ClassBox.Constant;
 
 import java.util.*;
 

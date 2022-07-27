@@ -1,6 +1,5 @@
-package love.simbot.example.listener;
+package love.simbot.example.core.listener;
 
-import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.*;
@@ -15,11 +14,14 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
-import love.simbot.example.listener.ClassBox.*;
+import love.simbot.example.BootAPIUse.API;
+import love.simbot.example.BootAPIUse.GeographyAPI.geoAPI;
+import love.simbot.example.core.listener.ClassBox.Constant;
+import love.simbot.example.core.listener.ClassBox.PeopleChangeWrite;
+import love.simbot.example.core.listener.ClassBox.TimeTranslate;
+import love.simbot.example.core.listener.ClassBox.Writing;
 
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Beans
-public class MyGroupListener1 extends Constant {
+public class GroupListener extends Constant {
 
 
     public static ExecutorService THREAD_POOL;
@@ -61,7 +63,7 @@ public class MyGroupListener1 extends Constant {
     /**
      * 调用天气地理API接口的类
      */
-    public GeoAPI geoApi = new GeoAPI();
+    public geoAPI geoApi = new geoAPI();
 
 
     @OnGroup
@@ -144,7 +146,12 @@ public class MyGroupListener1 extends Constant {
                 "2.【地理查询】 : /dl 城市\n(别名:XX地理)\n\n" +
                 "3.【群友互动】: 后接@人\n " +
                 "   ①/丢   ②/拍   ③/抓\n" +
-                "    ④/抱   ⑤/锤";
+                "    ④/抱   ⑤/锤\n\n" +
+                "二、无参指令\n" +
+                "1.【青年大学习】:\n查看当期青年大学习问题与答案\n\n" +
+                "2.【来点好康的】:\n阿姬的珍藏品~\n\n" +
+                "3.【来点原神】:\n阿姬的原神图片\n\n" +
+                "3.【看看动漫】:\n阿姬是个二刺螈";
         msgSender.SENDER.sendGroupMsg(groupMsg, helps);
     }
 
@@ -291,191 +298,12 @@ public class MyGroupListener1 extends Constant {
                 && !msg.contains("看看动漫") && !msg.contains("来点原神")
                 && !msg.contains(".关机") && !msg.contains(".开机") && !msg.contains("/help")
                 && !msg.contains("/丢") && !msg.contains("/拍") && !msg.contains("/抓")
-                && !msg.contains("/抱") && !msg.contains("/锤")) {
+                && !msg.contains("/抱") && !msg.contains("/锤") && !msg.contains("/tq")
+                && !msg.contains("/dl")) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
             if (!groupInfo.getGroupCode().equals(GROUPID3) && BOOTSTATE) {
                 sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
             }
-        }
-    }
-
-    /**
-     * 青年大学习模块
-     * 在收到@时调用青年大学习Api进行回复
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(atBot = true, value = "青年大学习", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void youthStudy(GroupMsg groupMsg, MsgSender msgSender) {
-
-        Sender sender = msgSender.SENDER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            sender.sendGroupMsg(groupMsg, api.YouthStudy());
-
-        }
-    }
-
-    /**
-     * 天气查询模块
-     * 在检测到关键词和命令后调用天气API来显示天气
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     * @param city      将通过正则匹配到的关键词城市传递给天气api
-     */
-    @OnGroup
-    @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
-    @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
-        if (BOOTSTATE) {
-            Sender sender = msgSender.SENDER;
-
-            GroupInfo groupInfo = groupMsg.getGroupInfo();
-            // 将群号为“637384877”的群排除在人工智能答复模块外.
-            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-                if (city == null) {
-                    sender.sendGroupMsg(groupMsg, "天气查询失败哦~ 请输入正确的城市~");
-                } else {
-                    sender.sendGroupMsg(groupMsg, geoApi.WeatherInfo(city));
-                    geoApi.adm1 = null;
-                    geoApi.adm2 = null;
-                    geoApi.id = null;
-                }
-            }
-        }
-    }
-
-    /**
-     * 城市地理信息查询模块
-     * 在检测到关键词和命令后调用地理API来显示天气
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     * @param city      将通过正则匹配到的关键词城市传递给地理api
-     */
-    @OnGroup
-    @Filter(value = "{{city}}地理", matchType = MatchType.REGEX_MATCHES, trim = true)
-    @Filter(value = "/dl{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void geoCity(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
-
-        Sender sender = msgSender.SENDER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            if (city == null) {
-                sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
-            } else {
-                sender.sendGroupMsg(groupMsg, geoApi.CityInfo(city));
-                geoApi.adm1 = null;
-                geoApi.adm2 = null;
-                geoApi.id = null;
-            }
-        }
-    }
-
-    /**
-     * 二刺螈模块
-     * 在收到@时调用P站Api进行链接发送
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(value = "来点好康的", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void picture(GroupMsg groupMsg, MsgSender msgSender) {
-
-        Sender sender = msgSender.SENDER;
-        Setter setter = msgSender.SETTER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String url = api.TwoDimensional();
-        String img = util.toCat("image", true, "file=" + url);
-
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            sender.sendGroupMsg(groupMsg, url);
-
-
-            MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                    flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
-
-            System.out.println(flag);
-
-
-            //用于创建延时对话
-            Timer timer = new Timer();
-
-            // 延迟45秒发送消息
-            TimerTask timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    // 通过flag撤回消息
-                    setter.setMsgRecall(flag);
-                }
-            };
-            timer.schedule(timerTask, 45000);
-
-        }
-    }
-
-    /**
-     * 二刺螈模块2
-     * 在收到@时调用动漫网址来发送图片
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(atBot = true, value = "看看动漫", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void picture2(GroupMsg groupMsg, MsgSender msgSender) {
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String msg = util.toCat("image", true, "file="
-                + "https://www.dmoe.cc/random.php");
-        Sender sender = msgSender.SENDER;
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        try {
-            // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-
-                sender.sendGroupMsg(groupMsg, msg);
-            }
-        } catch (Exception e) {
-            sender.sendGroupMsg(groupMsg, "超时了哦~");
-        }
-    }
-
-    /**
-     * 原神图片api
-     * 在收到@时调用原神图片api来发送图片
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(atBot = true, value = "来点原神", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void yuanShen(GroupMsg groupMsg, MsgSender msgSender) {
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String msg = util.toCat("image", true, "file="
-                + "https://api.dujin.org/pic/yuanshen/");
-
-        Sender sender = msgSender.SENDER;
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        try {
-            // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-
-                sender.sendGroupMsg(groupMsg, msg);
-            }
-        } catch (Exception e) {
-            sender.sendGroupMsg(groupMsg, "超时了哦~");
         }
     }
 
@@ -605,27 +433,6 @@ public class MyGroupListener1 extends Constant {
 
     }
 
-
-    /**
-     * 天气查询模块
-     * 在检测到关键词和命令后调用天气API来显示天气
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(value = "检测直播", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void BLive(GroupMsg groupMsg, MsgSender msgSender) {
-
-        Sender sender = msgSender.SENDER;
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            sender.sendGroupMsg(groupMsg, api.bLive(BiUpUid));
-        }
-    }
-
-
     /**
      * 群成员减少事件监听
      *
@@ -642,7 +449,8 @@ public class MyGroupListener1 extends Constant {
         // 主动退群
         if (groupMemberReduce.getReduceType().equals(GroupMemberReduce.Type.LEAVE)) {
             msgSender.SENDER.sendPrivateMsg("2094085327", "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]["
-                    + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是自愿退群的呢，走的时候很安详~");
+                    + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是自愿退群的呢，走的" +
+                    "很安详~");
         }
         // 被踢出群聊
         else {

@@ -1,4 +1,4 @@
-//package love.simbot.example.listener;
+//package love.simbot.example.core.listener;
 //
 //import catcode.CatCodeUtil;
 //import love.forte.common.ioc.annotation.Beans;

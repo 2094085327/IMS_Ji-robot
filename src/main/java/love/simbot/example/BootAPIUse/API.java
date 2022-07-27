@@ -1,6 +1,7 @@
-package love.simbot.example.listener.ClassBox;
+package love.simbot.example.BootAPIUse;
 
 import cn.hutool.http.HttpUtil;
+import love.simbot.example.core.listener.ClassBox.Constant;
 import net.sf.json.JSONObject;
 import org.json.JSONArray;
 
@@ -91,12 +92,12 @@ public class API extends Constant {
     }
 
     /**
-     * 二刺螈图片(P站图片，随机选择是否发送涩图）
+     * 二刺螈图片(P站图片，随机选择是否发送涩图)
      *
      * @return 返回获取到的P站图片url
      */
 
-    public String TwoDimensional() {
+    public String twoDimensional() {
         int random = (int) (Math.random() * 3);
         String url = "";
         switch (random) {
@@ -105,7 +106,7 @@ public class API extends Constant {
                 break;
             case 1:
             case 2:
-                url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝&r18=1";
+                url = "https://api.lolicon.app/setu/v2?tag=原神&tag=白丝|黑丝";
                 break;
             default:
         }
@@ -167,27 +168,20 @@ public class API extends Constant {
      * B站直播检测
      *
      * @param uid 输入up主的uid来检测齐直播间状态
-     * @return 返回直播状态，直播信息等
      */
     public void bLiveHelp(String uid) {
         try {
-            String url = "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?uids=" +
-                    uid + "&req_biz=video";
+            String url = "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?uids="
+                    + uid + "&req_biz=video";
             String jsonStr = HttpUtil.get(url);
             JSONObject object = JSONObject.fromObject(jsonStr);
             JSONObject data = object.getJSONObject("data");
             JSONObject byUids = data.getJSONObject("by_uids");
             JSONObject id = byUids.getJSONObject(uid);
             String liveStatus = id.getString("live_status");
-            String roomId = id.getString("room_id");
-            String title = id.getString("title");
-            String liveTime = id.getString("live_time");
-            String msg = "";
+
             if ("0".equals(liveStatus)) {
                 BLIVESTATE = "true";
-            }
-            if ("1".equals(liveStatus)) {
-                BLIVESTATE = "false";
             } else {
                 BLIVESTATE = "false";
             }

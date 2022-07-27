@@ -1,4 +1,4 @@
-package love.simbot.example.listener;
+package love.simbot.example.core.listener;
 
 import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
@@ -8,8 +8,8 @@ import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
-import love.simbot.example.listener.ClassBox.CatUtil;
-import love.simbot.example.listener.ClassBox.DiuProvider;
+import love.simbot.example.core.Util.CatUtil;
+import love.simbot.example.core.listener.ClassBox.DiuProvider;
 
 /**
  * @author zeng

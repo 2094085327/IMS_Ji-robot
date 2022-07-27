@@ -1,4 +1,4 @@
-package love.simbot.example.listener.ClassBox;
+package love.simbot.example.core.listener.ClassBox;
 
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.OnPrivateMsgRecall;
@@ -14,16 +14,19 @@ import love.forte.simbot.api.message.events.MsgGet;
 @Beans
 public class ReCall {
     @OnPrivateMsgRecall
-    public void PrivateRecall(MsgGet msg) {
+    public void privateRecall(MsgGet msg) {
         AccountInfo accountInfo = msg.getAccountInfo();
-        BotInfo botInfo = msg.getBotInfo();//获取机器人信息
+        //获取机器人信息
+        BotInfo botInfo = msg.getBotInfo();
 
         //获取当前时间
         TimeTranslate time1 = new TimeTranslate();
         String format1 = time1.tt();
 
         //在控制台输出信息
-        String personMsg = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/" + accountInfo.getAccountCode() + "]time了给bot[" + botInfo.getBotName() + "]" + "发送的信息";
+        String personMsg = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname()
+                + "/" + accountInfo.getAccountCode() + "]time了给Bot[" + botInfo.getBotName()
+                + "]" + "发送的信息";
         System.out.println(personMsg);
 
         //将信息存入日志

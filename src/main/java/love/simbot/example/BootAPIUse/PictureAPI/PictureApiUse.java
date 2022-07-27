@@ -1,0 +1,214 @@
+package love.simbot.example.BootAPIUse.PictureAPI;
+
+import catcode.CatCodeUtil;
+import love.forte.common.ioc.annotation.Beans;
+import love.forte.common.ioc.annotation.Depend;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.MessageContentBuilderFactory;
+import love.forte.simbot.api.message.containers.GroupInfo;
+import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.events.MessageGet;
+import love.forte.simbot.api.sender.MsgSender;
+import love.forte.simbot.api.sender.Sender;
+import love.forte.simbot.api.sender.Setter;
+import love.forte.simbot.filter.MatchType;
+import love.simbot.example.BootAPIUse.API;
+import love.simbot.example.core.listener.ClassBox.Constant;
+import love.simbot.example.BootAPIUse.GeographyAPI.geoAPI;
+import love.simbot.example.core.listener.ClassBox.TimeTranslate;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author zeng
+ * @date 2022/7/27 11:38
+ * @user 86188
+ */
+
+@Beans
+public class PictureApiUse extends Constant {
+
+    /**
+     * 线程池
+     */
+    public static ExecutorService THREAD_POOL;
+
+    /**
+     * 获取当前时间
+     */
+    public TimeTranslate time = new TimeTranslate();
+    /**
+     * #@全体成员的猫猫码
+     */
+    public String cat1 = "[CAT:at,all=true]";
+    /**
+     * 调用API接口的类
+     */
+    public API api = new API();
+    /**
+     * 调用天气地理API接口的类
+     */
+    public geoAPI geoApi = new geoAPI();
+    /**
+     * 注入得到一个消息构建器工厂
+     */
+    @Depend
+    private MessageContentBuilderFactory messageBuilderFactory;
+
+    /**
+     * 二刺螈模块
+     * 在收到@时调用P站Api进行链接发送
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(value = "来点好康的", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void picture(GroupMsg groupMsg, MsgSender msgSender) {
+
+        Sender sender = msgSender.SENDER;
+        Setter setter = msgSender.SETTER;
+
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+
+        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        String url = api.twoDimensional();
+        String img = util.toCat("image", true, "file=" + url);
+
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+            sender.sendGroupMsg(groupMsg, url);
+
+            // 创建消息标记
+            MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                    flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
+
+            // 线程池
+            THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                    TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+                Thread thread = new Thread(r);
+                thread.setName(String.format("newThread%d", thread.getId()));
+                return thread;
+            });
+
+            // 创建延时消息
+            THREAD_POOL.execute(() -> {
+                try {
+                    // 线程休眠45秒
+                    Thread.sleep(45000);
+                    setter.setMsgRecall(flag);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    /**
+     * 二刺螈模块2
+     * 在收到@时调用动漫网址来发送图片
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(atBot = true, value = "看看动漫", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void picture2(GroupMsg groupMsg, MsgSender msgSender) {
+        Setter setter = msgSender.SETTER;
+        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        String msg = util.toCat("image", true, "file="
+                + "https://www.dmoe.cc/random.php");
+        Sender sender = msgSender.SENDER;
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        try {
+            // 将群号为“637384877”的群排除在人工智能答复模块外
+            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+
+                // 消息标记
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, msg).get();
+
+                System.out.println(flag);
+
+                // 线程池
+                THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                        TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName(String.format("newThread%d", thread.getId()));
+                    return thread;
+                });
+
+                // 创建延时消息
+                THREAD_POOL.execute(() -> {
+                    try {
+                        // 线程休眠45秒
+                        Thread.sleep(45000);
+                        setter.setMsgRecall(flag);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+        } catch (Exception e) {
+            sender.sendGroupMsg(groupMsg, "超时了哦~");
+        }
+    }
+
+    /**
+     * 原神图片api
+     * 在收到@时调用原神图片api来发送图片
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(atBot = true, value = "来点原神", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void yuanShen(GroupMsg groupMsg, MsgSender msgSender) {
+        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        String msg = util.toCat("image", true, "file="
+                + "https://api.dujin.org/pic/yuanshen/");
+
+        Sender sender = msgSender.SENDER;
+        Setter setter = msgSender.SETTER;
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        try {
+            // 将群号为“637384877”的群排除在人工智能答复模块外
+            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+
+                // 消息标记
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, msg).get();
+
+                System.out.println(flag);
+
+                // 线程池
+                THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                        TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName(String.format("newThread%d", thread.getId()));
+                    return thread;
+                });
+
+                // 创建延时消息
+                THREAD_POOL.execute(() -> {
+                    try {
+                        // 线程休眠45秒
+                        Thread.sleep(45000);
+                        setter.setMsgRecall(flag);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+        } catch (Exception e) {
+            sender.sendGroupMsg(groupMsg, "超时了哦~");
+        }
+    }
+
+}

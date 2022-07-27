@@ -1,4 +1,4 @@
-package love.simbot.example.listener.ClassBox;
+package love.simbot.example.core.listener.ClassBox;
 
 import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
@@ -9,6 +9,7 @@ import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.timer.Cron;
 import love.forte.simbot.timer.EnableTimeTask;
 import love.forte.simbot.timer.Fixed;
+import love.simbot.example.BootAPIUse.API;
 
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +53,6 @@ public class MyTast extends Constant {
     }
 
     @Cron(value = "0 32 20 * * ? *")
-    //@Cron(value = "0 18 8 * * ? *")
     public void img() {
         Bot bot = manager.getBot("341677404");
         BotSender botSender = bot.getSender();

@@ -1,4 +1,4 @@
-package love.simbot.example.listener.ClassBox;
+package love.simbot.example.core.listener.ClassBox;
 
 import java.io.BufferedWriter;
 import java.io.File;

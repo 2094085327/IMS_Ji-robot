@@ -1,17 +1,21 @@
-package love.simbot.example.listener;
+package love.simbot.example.core.listener;
 
-import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
-import love.forte.simbot.annotation.*;
+import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.Listen;
+import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.annotation.OnPrivate;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.BotInfo;
-import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
-import love.simbot.example.listener.ClassBox.*;
+import love.simbot.example.BootAPIUse.API;
+import love.simbot.example.core.listener.ClassBox.Constant;
+import love.simbot.example.core.listener.ClassBox.TimeTranslate;
+import love.simbot.example.core.listener.ClassBox.Writing;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,19 +35,14 @@ public class MyprivateListener1 extends Constant {
      */
     public API api = new API();
 
-    /**
-     * 调用天气地理API接口的类
-     */
-    public GeoAPI geoApi = new GeoAPI();
-
     public static ExecutorService THREAD_POOL;
 
     /**
      * 解除禁言模块
      * #@Filter() 注解为消息过滤器
      *
-     * @param privateMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
+     * @param privateMsg 用于获取群聊消息，群成员信息等
+     * @param msgSender  用于在群聊中发送消息
      */
     @OnPrivate
     @Filter(value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
@@ -63,8 +62,8 @@ public class MyprivateListener1 extends Constant {
      * 解除禁言模块
      * #@Filter() 注解为消息过滤器
      *
-     * @param privateMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
+     * @param privateMsg 用于获取群聊消息，群成员信息等
+     * @param msgSender  用于在群聊中发送消息
      */
     @OnGroup
     @Filter(value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
@@ -140,14 +139,14 @@ public class MyprivateListener1 extends Constant {
             return thread;
         });
         if (BOOTSTATE) {
-            CatCodeUtil util = CatCodeUtil.INSTANCE;
-            String img = util.toCat("image", true, "file="
-                    + "https://c2cpicdw.qpic.cn/offpic_new/2094085327//2094085327-746385872-8246287FAB0F39E42CB2EDEF38E9C700/0?term&#61;2");
-
 
             if (!msgs.contains("天气") && !msgs.contains("青年大学习") && !msgs.contains("禁言")
                     && !msgs.contains("@全体成员") && !msgs.contains("来点好康的")
-                    && !msgs.contains("看看动漫") && !msgs.contains("来点原神")) {
+                    && !msgs.contains("看看动漫") && !msgs.contains("来点原神")
+                    && !msgs.contains(".关机") && !msgs.contains(".开机") && !msgs.contains("/help")
+                    && !msgs.contains("/丢") && !msgs.contains("/拍") && !msgs.contains("/抓")
+                    && !msgs.contains("/抱") && !msgs.contains("/锤") && !msgs.contains("/tq")
+                    && !msgs.contains("/dl")) {
                 //检测到特定私信内容进行特定回复
                 if ("hi".equals(msg.getMsg()) || "你好".equals(msg.getMsg())) {
 
@@ -156,13 +155,11 @@ public class MyprivateListener1 extends Constant {
                 } else {
 
                     THREAD_POOL.execute(() -> {
-                        sender.sendPrivateMsg(msg, api.result(msg.getText()));
 
                         // 获取消息的flag
                         MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                                flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, img).get();
+                                flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, api.result(msg.getText())).get();
 
-                        System.out.println(flag);
                         // 通过flag撤回消息
                         try {
                             // 休眠10000ms
@@ -178,29 +175,5 @@ public class MyprivateListener1 extends Constant {
         }
     }
 
-    /**
-     * 天气查询模块
-     * 在检测到关键词和命令后调用天气API来显示天气
-     *
-     * @param privateMsg 用于获取私聊消息，群成员信息等
-     * @param msgSender  用于在群聊中发送消息
-     * @param city       将通过正则匹配到的关键词城市传递给天气api
-     */
-    @OnPrivate
-    @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
-    @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void weather(PrivateMsg privateMsg, MsgSender msgSender, @FilterValue("city") String city) {
 
-        Sender sender = msgSender.SENDER;
-
-        if (city == null) {
-            sender.sendPrivateMsg(privateMsg, "天气查询失败哦~ 请输入正确的城市~");
-        } else {
-            sender.sendPrivateMsg(privateMsg, geoApi.WeatherInfo(city));
-            geoApi.adm1 = null;
-            geoApi.adm2 = null;
-            geoApi.id = null;
-        }
-
-    }
 }
