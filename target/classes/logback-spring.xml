@@ -47,7 +47,7 @@
     </appender>
 
     <!-- project default level -->
-    <logger name="love.simbot.example.core.listener" level="ERROR" />
+    <logger name="love.simbot.example.core.listener" level="ERROR"/>
 
     <!-- 日志输出级别 -->
     <root level="INFO">

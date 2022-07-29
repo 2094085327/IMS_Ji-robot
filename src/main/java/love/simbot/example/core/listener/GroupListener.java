@@ -60,12 +60,6 @@ public class GroupListener extends Constant {
      */
     public API api = new API();
 
-    /**
-     * 调用天气地理API接口的类
-     */
-    public geoAPI geoApi = new geoAPI();
-
-
     @OnGroup
     public void group(GroupMsg groupMsg, MsgSender msgSender) {
 
@@ -138,7 +132,6 @@ public class GroupListener extends Constant {
     @OnGroup
     @Filter(value = "/help", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void help(GroupMsg groupMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
 
         String helps = "[无量姬的指令]\n" +
                 "一、含参指令\n" +
@@ -413,7 +406,7 @@ public class GroupListener extends Constant {
             sender.sendGroupMsg(groupInfo, msg3);
         }
 
-        if (groupInfo.getGroupCode().equals(GROUPID1)) {
+        if (groupInfo.getGroupCode().equals(GROUPID5)) {
 
             MessageContent msg = builder
                     // at当事人

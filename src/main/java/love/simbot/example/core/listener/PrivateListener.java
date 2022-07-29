@@ -16,7 +16,11 @@ import love.simbot.example.BootAPIUse.API;
 import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 import love.simbot.example.core.listener.ClassBox.Writing;
+import love.simbot.example.BootAPIUse.OtherAPI.kedaya;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Beans
-public class MyprivateListener1 extends Constant {
+public class PrivateListener extends Constant {
 
     /**
      * 调用API接口的类
@@ -127,7 +131,7 @@ public class MyprivateListener1 extends Constant {
      * @param msgSender 消息SENDER GETTER SETTER
      */
     @OnPrivate
-    public void replay(PrivateMsg msg, Sender sender, MsgSender msgSender) {
+    public void replay(PrivateMsg msg, Sender sender, MsgSender msgSender) throws IOException {
 
         String msgs = msg.getMsg();
 
@@ -149,8 +153,12 @@ public class MyprivateListener1 extends Constant {
                     && !msgs.contains("/dl")) {
                 //检测到特定私信内容进行特定回复
                 if ("hi".equals(msg.getMsg()) || "你好".equals(msg.getMsg())) {
+                    kedaya ke = new kedaya();
 
                     sender.sendPrivateMsg(msg, "嗨！");
+                    System.out.println(this.getClass().getResourceAsStream("/image/kedaya.gif"));
+                    OutputStream out = new FileOutputStream("C:\\Users\\86188\\Desktop\\image\\" + 1 + ".gif");
+                    out.write(ke.makeImage("aa", "hh"));
 
                 } else {
 
