@@ -10,6 +10,7 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.core.Util.CatUtil;
+import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.DiuProvider;
 
 /**
@@ -18,7 +19,7 @@ import love.simbot.example.core.listener.ClassBox.DiuProvider;
  * @user 86188
  */
 @Beans
-public class DiuListener {
+public class DiuListener extends Constant {
 
     /**
      * 互动模块-丢
@@ -129,7 +130,6 @@ public class DiuListener {
             sender.sendGroupMsg(groupMsg, msg);
         } catch (Exception e) {
             String atMe = "[CAT:at,code=2094085327]";
-            String face = "[CAT:face,id=5]";
             String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
             sender.sendGroupMsg(groupMsg, atOther + "姬姬抱不到" + face);

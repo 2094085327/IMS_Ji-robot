@@ -15,6 +15,8 @@ public class Constant {
 
     public String USERID1 = "2094085327";
 
+    public String BOOTID1 = "341677404";
+
     public String SENTENCE1 = "这群里的机器人，难道只会复读？";
     public String SENTENCE2 = "除了复读，你们一无是处！";
     public String SENTENCE3 = "我才不要和一群复读机呆在一起，\uD83E\uDD2C";
@@ -26,6 +28,8 @@ public class Constant {
 
     public static String BLIVESTATE = "true";
     public static String SendTwice = "true";
+
+    public String face = "[CAT:face,id=5]";
 
 
 }

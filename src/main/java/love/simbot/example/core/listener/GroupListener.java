@@ -10,12 +10,14 @@ import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupAccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.*;
+import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
+import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.BootAPIUse.API;
-import love.simbot.example.BootAPIUse.GeographyAPI.geoAPI;
+import love.simbot.example.core.Util.CatUtil;
 import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.PeopleChangeWrite;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
@@ -34,6 +36,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Beans
 public class GroupListener extends Constant {
+
+    /**
+     * 构建机器人管理器
+     */
+    @Depend
+    private BotManager manager;
 
 
     public static ExecutorService THREAD_POOL;
@@ -192,33 +200,6 @@ public class GroupListener extends Constant {
 
 
     /**
-     * 解除禁言模块
-     * #@Filter() 注解为消息过滤器
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(atBot = true, value = "禁言解除", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void removeBan(GroupMsg groupMsg, MsgSender msgSender) {
-        Setter setter = msgSender.SETTER;
-
-        // 获取群信息-群号
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String groupId = groupInfo.getGroupCode();
-
-        if (groupId.equals(GROUPID1)) {
-            setter.setGroupBan(GROUPID1, "1591461730", 0, TimeUnit.MINUTES);
-            setter.setGroupBan(GROUPID1, "2807802317", 0, TimeUnit.MINUTES);
-            setter.setGroupBan(GROUPID1, "2057000856", 0, TimeUnit.MINUTES);
-        }
-
-        if (groupId.equals(GROUPID2)) {
-            setter.setGroupBan(GROUPID2, "1624158591", 0, TimeUnit.MINUTES);
-        }
-    }
-
-    /**
      * 请求@全体成员模块
      * #@Filter() 注解为消息过滤器
      *
@@ -249,28 +230,79 @@ public class GroupListener extends Constant {
      * @param msgSender 用于在群聊中发送消息
      */
     @OnGroup
-    @Filter(atBot = true, value = "禁言*{{time,\\d+}}分钟", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(value = "禁言*{{time,\\d+}}分钟", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void atBot(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("time") String time) {
         Setter setter = msgSender.SETTER;
+        Sender sender = msgSender.SENDER;
 
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+
         String groupId = groupInfo.getGroupCode();
 
-        if (groupId.equals(GROUPID1)) {
-            String banTime1 = "5";
-            if (banTime1.equals(time)) {
-                setter.setGroupBan(GROUPID1, "2057000856", 5, TimeUnit.MINUTES);
+        // 通过猫猫码获取被@的人
+        String people = CatUtil.getAt(groupMsg.getMsg());
 
+        // 判断bot是否为管理员
+        GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
+
+
+        // @的人
+        String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+        if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
+            if (USERID1.equals(accountInfo.getAccountCode())) {
+
+                assert people != null;
+                setter.setGroupBan(groupId, people, Long.parseLong(time), TimeUnit.MINUTES);
+                // setter.setGroupWholeBan(GROUPID1,true); 群禁言
             } else {
-                setter.setGroupBan(GROUPID1, "1591461730", Long.parseLong(time), TimeUnit.MINUTES);
-                setter.setGroupBan(GROUPID1, "2807802317", Long.parseLong(time), TimeUnit.MINUTES);
+                sender.sendGroupMsg(groupMsg, atPeople + "你没有权限禁言哦");
             }
-        }
-        if (groupId.equals(GROUPID2)) {
-            setter.setGroupBan("695525945", "1624158591", Long.parseLong(time), TimeUnit.MINUTES);
+        } else {
+            sender.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
         }
     }
 
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     *
+     * @param groupMsg  用于获取群聊消息，群成员信息等
+     * @param msgSender 用于在群聊中发送消息
+     */
+    @OnGroup
+    @Filter(value = "解除禁言", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void removeBan(GroupMsg groupMsg, MsgSender msgSender) {
+        Setter setter = msgSender.SETTER;
+        Sender sender = msgSender.SENDER;
+
+        // 获取群信息-群号-个人信息
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+        String groupId = groupInfo.getGroupCode();
+
+        // 通过猫猫码获取被@的人
+        String people = CatUtil.getAt(groupMsg.getMsg());
+
+        // 判断bot是否为管理员
+        GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
+
+        // @的人
+        String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+        if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
+            if (USERID1.equals(accountInfo.getAccountCode())) {
+
+                // 将群成员设置为解除禁言的状态
+                assert people != null;
+                setter.setGroupBan(groupId, people, 0, TimeUnit.MINUTES);
+            } else {
+                setter.setGroupBan(groupId, atPeople, 0, TimeUnit.MINUTES);
+                sender.sendGroupMsg(groupId, atPeople + "你没有权限解除禁言哦~");
+            }
+        } else {
+            sender.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
+        }
+    }
 
     /**
      * 人工智能回复模块
