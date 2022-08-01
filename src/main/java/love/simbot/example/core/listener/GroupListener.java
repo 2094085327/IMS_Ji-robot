@@ -210,16 +210,28 @@ public class GroupListener extends Constant {
     @Filter(value = "请求@全体成员", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void atAll(GroupMsg groupMsg, MsgSender msgSender) {
         Sender sender = msgSender.SENDER;
+
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         String groupId = groupInfo.getGroupCode();
 
-        if (groupId.equals(GROUPID1)) {
-            sender.sendGroupMsg("1019170385", cat1);
+        // 判断bot是否为管理员
+        GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
+
+        // @的人
+        String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+
+        if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
+            if (USERID1.equals(accountInfo.getAccountCode())) {
+                sender.sendGroupMsg(groupId, cat1);
+            } else {
+                sender.sendGroupMsg(groupMsg, atPeople + "你没有权限禁言哦");
+            }
+        } else {
+            sender.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
         }
 
-        if (groupId.equals(GROUPID2)) {
-            sender.sendGroupMsg("695525945", cat1);
-        }
+
     }
 
     /**
@@ -246,9 +258,9 @@ public class GroupListener extends Constant {
         // 判断bot是否为管理员
         GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
 
-
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+
         if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
             if (USERID1.equals(accountInfo.getAccountCode())) {
 
@@ -463,7 +475,7 @@ public class GroupListener extends Constant {
      *
      * @param groupMemberReduce 群成员减少信息
      */
-    @OnGroupMemberReduce
+    // @OnGroupMemberReduce
     public void memberReduce(GroupMemberReduce groupMemberReduce, MsgSender msgSender) {
 
         //退群者信息
