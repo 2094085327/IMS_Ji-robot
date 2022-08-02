@@ -88,7 +88,7 @@ public class OtherApiUse extends Constant {
         // 将群号为“637384877”的群排除在人工智能答复模块外
         if (!groupInfo.getGroupCode().equals(GROUPID3)) {
             kedaya ke = new kedaya();
-            System.out.println(this.getClass().getResourceAsStream("/image/kedaya.gif"));
+
             OutputStream out = new FileOutputStream("C:\\Users\\86188\\Desktop\\simbot-mirai-demo1\\src\\main\\resources\\image\\" + 1 + ".gif");
             out.write(ke.makeImage(left, right));
 
