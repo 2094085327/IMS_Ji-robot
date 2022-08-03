@@ -23,6 +23,7 @@ import love.simbot.example.core.listener.ClassBox.PeopleChangeWrite;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 import love.simbot.example.core.listener.ClassBox.Writing;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -329,17 +330,27 @@ public class GroupListener extends Constant {
 
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
         String msg = groupMsg.getMsg();
-        if (!msg.contains("天气") && !msg.contains("青年大学习") && !msg.contains("禁言")
-                && !msg.contains("@全体成员") && !msg.contains("来点好康的")
-                && !msg.contains("看看动漫") && !msg.contains("来点原神")
-                && !msg.contains(".关机") && !msg.contains(".开机") && !msg.contains("/help")
-                && !msg.contains("/丢") && !msg.contains("/拍") && !msg.contains("/抓")
-                && !msg.contains("/抱") && !msg.contains("/锤") && !msg.contains("/tq")
-                && !msg.contains("/dl")) {
+
+        // 将数组通过流的形式遍历并计数有效的指令个数
+        int listSize = (int) Arrays.stream(list).filter(msg::contains).count();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+
+        // 当输入的msg通过contains匹配到相应指令时listSize值为1，无相应指令时为0，在无指令时调用API
+        if (listSize != 1) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID3) && BOOTSTATE) {
+            if (groupBanId != 1 && BOOTSTATE) {
+
                 sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
+            }
+            // 当被Bot在被屏蔽的群组中被@时将消息转发至User
+            if (groupBanId == 1) {
+
+                msgSender.SENDER.sendPrivateMsg(USERID1, "[" + accountInfo.getAccountCode()
+                        + "-" + accountInfo.getAccountNickname() + "]正在屏蔽群组["
+                        + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]@Bot");
+                msgSender.SENDER.sendPrivateMsg(USERID1, "消息内容为:" + groupMsg.getMsg());
             }
         }
     }
@@ -475,7 +486,8 @@ public class GroupListener extends Constant {
      *
      * @param groupMemberReduce 群成员减少信息
      */
-    // @OnGroupMemberReduce
+
+    @OnGroupMemberReduce
     public void memberReduce(GroupMemberReduce groupMemberReduce, MsgSender msgSender) {
 
         //退群者信息

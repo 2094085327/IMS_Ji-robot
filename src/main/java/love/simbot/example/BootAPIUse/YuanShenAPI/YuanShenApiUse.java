@@ -3,6 +3,7 @@ package love.simbot.example.BootAPIUse.YuanShenAPI;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author zeng
@@ -34,6 +35,23 @@ public class YuanShenApiUse {
     }
 
     public static void main(String[] args) throws MalformedURLException {
+        String msg = "[CAT:at,code=341677404]青年大学习";
+        String[] list = {"天气", "青年大学习", "禁言", "@全体成员", "来点好康的",
+                "看看动漫", "来点原神", ".关机", ".开机", "/help", "/丢", "/拍", "/抓", "/抱",
+                "/锤", "/tq", "/dl"};
+
+
+        Arrays.stream(list).filter(str -> msg.contains(str)).findFirst();
+        int newList = (int) Arrays.stream(list).filter(msg::contains).count();
+
+        String newmsg = String.valueOf(Arrays.stream(list).filter(msg::contains).findFirst());
+
+        System.out.println(newmsg);
+        if (newList == 1) {
+            System.out.println("newList");
+        }
+        System.out.println(Arrays.stream(list).filter(str -> msg.contains(str)).collect(Collectors.toList()));
+
         //toApi(url);
         for (int i = 1; i <= 5; i++) {
             System.out.println(Param.getParam("size", url, i));
