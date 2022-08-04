@@ -1,5 +1,6 @@
 package love.simbot.example.BootAPIUse.GeographyAPI;
 
+import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.FilterValue;
@@ -11,7 +12,11 @@ import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
+import love.simbot.example.BootAPIUse.API;
 import love.simbot.example.core.listener.ClassBox.Constant;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author zeng
@@ -26,6 +31,8 @@ public class GeographyApiUse extends Constant {
      */
     geoAPI geoApi = new geoAPI();
 
+    API api = new API();
+
     /**
      * 群聊天气查询模块
      * 在检测到关键词和命令后调用天气API来显示天气
@@ -37,7 +44,7 @@ public class GeographyApiUse extends Constant {
     @OnGroup
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) throws IOException {
         if (BOOTSTATE) {
             Sender sender = msgSender.SENDER;
 
@@ -51,6 +58,7 @@ public class GeographyApiUse extends Constant {
                     geoApi.adm1 = null;
                     geoApi.adm2 = null;
                     geoApi.id = null;
+
                 }
             }
         }

@@ -1,5 +1,6 @@
 package love.simbot.example.core.listener;
 
+import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.*;
@@ -23,6 +24,8 @@ import love.simbot.example.core.listener.ClassBox.PeopleChangeWrite;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 import love.simbot.example.core.listener.ClassBox.Writing;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -326,7 +329,7 @@ public class GroupListener extends Constant {
      */
     @OnGroup
     @Filter(atBot = true)
-    public void chat(GroupMsg groupMsg, MsgSender msgSender) {
+    public void chat(GroupMsg groupMsg, MsgSender msgSender) throws IOException {
 
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
@@ -341,8 +344,15 @@ public class GroupListener extends Constant {
         if (listSize != 1) {
             // 将群号为“637384877”的群排除在人工智能答复模块外
             if (groupBanId != 1 && BOOTSTATE) {
+                String reMsg = api.result(groupMsg.getText());
+                sender.sendGroupMsg(groupMsg, reMsg);
 
-                sender.sendGroupMsg(groupMsg, api.result(groupMsg.getText()));
+                CatCodeUtil util = CatCodeUtil.INSTANCE;
+                File file = new File(System.getProperty("user.dir"));
+                System.out.println(file);
+                String voice = util.toCat("voice", true, "file="
+                        + api.record(reMsg));
+                sender.sendGroupMsg(groupMsg, voice);
             }
             // 当被Bot在被屏蔽的群组中被@时将消息转发至User
             if (groupBanId == 1) {

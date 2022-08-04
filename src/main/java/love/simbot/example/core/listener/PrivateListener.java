@@ -1,5 +1,6 @@
 package love.simbot.example.core.listener;
 
+import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.Listen;
@@ -13,14 +14,14 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.BootAPIUse.API;
+import love.simbot.example.core.Util.CatUtil;
 import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 import love.simbot.example.core.listener.ClassBox.Writing;
-import love.simbot.example.BootAPIUse.OtherAPI.kedaya;
 
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -69,7 +70,7 @@ public class PrivateListener extends Constant {
      * @param privateMsg 用于获取群聊消息，群成员信息等
      * @param msgSender  用于在群聊中发送消息
      */
-    @OnGroup
+    @OnPrivate
     @Filter(value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void setGroupStateOpen(PrivateMsg privateMsg, MsgSender msgSender) {
         AccountInfo accountInfo = privateMsg.getAccountInfo();
@@ -126,14 +127,14 @@ public class PrivateListener extends Constant {
     /**
      * 私聊消息回复与撤回
      *
-     * @param msg       私聊消息获取
-     * @param sender    构建发送器
-     * @param msgSender 消息SENDER GETTER SETTER
+     * @param privateMsg 私聊消息获取
+     * @param sender     构建发送器
+     * @param msgSender  消息SENDER GETTER SETTER
      */
     @OnPrivate
-    public void replay(PrivateMsg msg, Sender sender, MsgSender msgSender) throws IOException {
+    public void replay(PrivateMsg privateMsg, Sender sender, MsgSender msgSender) throws IOException {
 
-        String msgs = msg.getMsg();
+        String msgs = privateMsg.getMsg();
 
         // 创建线程池
         THREAD_POOL = new ThreadPoolExecutor(50, 50, 10000,
@@ -142,46 +143,65 @@ public class PrivateListener extends Constant {
             thread.setName(String.format("newThread%d", thread.getId()));
             return thread;
         });
-        if (BOOTSTATE) {
 
-            if (!msgs.contains("天气") && !msgs.contains("青年大学习") && !msgs.contains("禁言")
-                    && !msgs.contains("@全体成员") && !msgs.contains("来点好康的")
-                    && !msgs.contains("看看动漫") && !msgs.contains("来点原神")
-                    && !msgs.contains(".关机") && !msgs.contains(".开机") && !msgs.contains("/help")
-                    && !msgs.contains("/丢") && !msgs.contains("/拍") && !msgs.contains("/抓")
-                    && !msgs.contains("/抱") && !msgs.contains("/锤") && !msgs.contains("/tq")
-                    && !msgs.contains("/dl")) {
-                //检测到特定私信内容进行特定回复
-                if ("hi".equals(msg.getMsg()) || "你好".equals(msg.getMsg())) {
-                    kedaya ke = new kedaya();
+        // 将数组通过流的形式遍历并计数有效的指令个数
+        int listSize = (int) Arrays.stream(list).filter(msgs::contains).count();
 
-                    sender.sendPrivateMsg(msg, "嗨！");
-                    System.out.println(this.getClass().getResourceAsStream("/image/kedaya.gif"));
-                    OutputStream out = new FileOutputStream("C:\\Users\\86188\\Desktop\\image\\" + 1 + ".gif");
-                    out.write(ke.makeImage("aa", "hh"));
+        if (BOOTSTATE && listSize != 1) {
 
-                } else {
+            //检测到特定私信内容进行特定回复
+            if ("hi".equals(privateMsg.getMsg()) || "你好".equals(privateMsg.getMsg())) {
+                CatCodeUtil util = CatCodeUtil.INSTANCE;
+                sender.sendPrivateMsg(privateMsg, "嗨！");
 
-                    THREAD_POOL.execute(() -> {
+                File file = new File(System.getProperty("user.dir"));
+                System.out.println(file);
+                String voice = util.toCat("voice", true, "file=" + api.record(msgs));
 
-                        // 获取消息的flag
-                        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                                flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(msg, api.result(msg.getText())).get();
+                CatUtil.getRecord(file + "\\resources\\voicePack\\audio.wav");
 
-                        // 通过flag撤回消息
-                        try {
-                            // 休眠10000ms
-                            Thread.sleep(10000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        // 撤回操作
-                        msgSender.SETTER.setMsgRecall(flag);
-                    });
-                }
+                System.out.println(voice);
+
+//                sender.sendPrivateMsg(privateMsg, CatUtil.getRecord(file + "\\src\\main\\resources\\voicePack\\audio.wav").toString());
+//                api.record("红红火火恍恍惚惚");
+                sender.sendPrivateMsg(privateMsg, voice);
+
+                /**
+                 * https://fanyi.sogou.com/reventondc/synthesis?text=你好啊&speed=1&lang=zh-CHS&from=translateweb&speaker=6
+                 * 相关参数：
+                 * text =要转换的文本
+                 * speed=语速 1~很大 ，越大，语速越慢
+                 * lan 语言类型{
+                 *
+                 *         lan=en 英文
+                 *         lan = zh-CHS 中文
+                 *
+                 * }
+                 * from =未知，猜测是翻译来源
+                 * speaker =语音类型 1-6的数字
+                 */
+
+            } else {
+
+                THREAD_POOL.execute(() -> {
+
+                    // 获取消息的flag
+                    MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                            flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(privateMsg, api.result(privateMsg.getText())).get();
+
+                    // 通过flag撤回消息
+                    try {
+                        // 休眠10000ms
+                        Thread.sleep(10000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    // 撤回操作
+                    msgSender.SETTER.setMsgRecall(flag);
+                });
             }
         }
     }
-
-
 }
+
+

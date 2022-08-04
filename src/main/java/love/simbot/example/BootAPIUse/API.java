@@ -38,7 +38,7 @@ public class API extends Constant {
 
         //请求数据
         //params用于存储请求数据的参数
-        params.put("API_KEY", "KxfWKvDylXtWXkb1YqMIYSmm");
+
         params.put("appid", "ae8009f3d0c07ae156271f15f28e11e1");
         params.put("SECRET_KEY", "29af4375c3a146f3adabc3aa56a5eaf0");
         params.put("spoken", message);
@@ -190,6 +190,24 @@ public class API extends Constant {
             BLIVESTATE = "false";
 
         }
+    }
+
+    /**
+     * 人工智能语音APi
+     *
+     * @param message 接收传递来的消息
+     * @return 当能够正常处理时返回AI的自动回复，否则当catch到异常时返回猫猫码狗头
+     */
+    public String record(String message) {
+        // 去除消息中的空格
+        // 将中文空格替换为英文空格
+        message = message.trim();
+        message = message.replace((char) 12288, ' ');
+
+        // 接口地址
+
+        return "https://fanyi.sogou.com/reventondc/synthesis?text=" + message + "&speed=1&lang=zh-CHS&from=translateweb&speaker=2";
 
     }
+
 }
