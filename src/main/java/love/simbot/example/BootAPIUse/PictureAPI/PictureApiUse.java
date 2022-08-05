@@ -14,8 +14,8 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.BootAPIUse.API;
-import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.BootAPIUse.GeographyAPI.geoAPI;
+import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 
 import java.util.concurrent.ExecutorService;
@@ -31,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 @Beans
 public class PictureApiUse extends Constant {
+
+    public MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag1;
+    public MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag2;
 
     /**
      * 线程池
@@ -76,35 +79,62 @@ public class PictureApiUse extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String url = api.twoDimensional();
-        String img = util.toCat("image", true, "file=" + url);
+        String imgMsg = api.twoDimensional();
+        String url = api.url;
+
+        // 线程池
+        THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+            Thread thread = new Thread(r);
+            thread.setName(String.format("newThread%d", thread.getId()));
+            return thread;
+        });
+
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
         if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            sender.sendGroupMsg(groupMsg, url);
+            //sender.sendGroupMsg(groupMsg, url);
+            try {
 
-            // 创建消息标记
-            MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                    flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
 
-            // 线程池
-            THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
-                    TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
-                Thread thread = new Thread(r);
-                thread.setName(String.format("newThread%d", thread.getId()));
-                return thread;
-            });
+                String img = util.toCat("image", true, "file=" + url);
 
-            // 创建延时消息
-            THREAD_POOL.execute(() -> {
-                try {
-                    // 线程休眠45秒
-                    Thread.sleep(45000);
-                    setter.setMsgRecall(flag);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
+                // 创建消息标记
+                this.flag1 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, imgMsg).get();
+
+                // 创建消息标记
+                this.flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
+
+
+//                // 创建延时消息
+//                THREAD_POOL.execute(() -> {
+//                    try {
+//                        // 线程休眠45秒
+//                        Thread.sleep(45000);
+//                        setter.setMsgRecall(flag1);
+//                        setter.setMsgRecall(flag2);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                });
+            } catch (Exception e) {
+                String img = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
+                msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, img);
+
+            } finally {
+                // 创建延时消息
+                THREAD_POOL.execute(() -> {
+                    try {
+                        // 线程休眠45秒
+                        Thread.sleep(45000);
+                        setter.setMsgRecall(flag1);
+                        setter.setMsgRecall(flag2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
     }
 

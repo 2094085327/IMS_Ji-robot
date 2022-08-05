@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
  */
 public class API extends Constant {
 
+    public String url;
+
     public Map<String, Object> params = new HashMap<>();
 
     /**
@@ -119,9 +121,21 @@ public class API extends Constant {
             jsonArray = new JSONArray(data);
             System.out.println(jsonArray.getJSONObject(0).getJSONObject("urls"));
 
-            return jsonArray.getJSONObject(0).getJSONObject("urls").getString("original");
+            String title = jsonArray.getJSONObject(0).getString("title");
+            String author = jsonArray.getJSONObject(0).getString("author");
+            boolean r18 = jsonArray.getJSONObject(0).getBoolean("r18");
+            JSONArray tags;
+
+            tags = jsonArray.getJSONObject(0).getJSONArray("tags");
+
+            String urls = jsonArray.getJSONObject(0).getJSONObject("urls").getString("original");
+            this.url = urls;
+
+            return "Title:" + title + "\n\nAuthor:" + author + "\n\nR18:" + r18 + "\n\nTags:" + tags + "\n\nURL:" + urls;
         } catch (Exception e) {
-            return "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2";
+            System.out.println(e);
+            this.url = "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2";
+            return "啊哦~涩图不见了呢";
         }
 
     }
