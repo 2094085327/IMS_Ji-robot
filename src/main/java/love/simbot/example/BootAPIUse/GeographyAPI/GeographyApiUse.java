@@ -44,7 +44,7 @@ public class GeographyApiUse extends Constant {
     @OnGroup
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) throws IOException {
+    public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
         if (BOOTSTATE) {
             Sender sender = msgSender.SENDER;
 
