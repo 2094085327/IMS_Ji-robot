@@ -124,9 +124,7 @@ public class API extends Constant {
             String title = jsonArray.getJSONObject(0).getString("title");
             String author = jsonArray.getJSONObject(0).getString("author");
             boolean r18 = jsonArray.getJSONObject(0).getBoolean("r18");
-            JSONArray tags;
-
-            tags = jsonArray.getJSONObject(0).getJSONArray("tags");
+            JSONArray tags = jsonArray.getJSONObject(0).getJSONArray("tags");
 
             String urls = jsonArray.getJSONObject(0).getJSONObject("urls").getString("original");
             this.url = urls;

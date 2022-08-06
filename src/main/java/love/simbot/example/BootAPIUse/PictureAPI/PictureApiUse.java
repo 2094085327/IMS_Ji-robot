@@ -2,10 +2,8 @@ package love.simbot.example.BootAPIUse.PictureAPI;
 
 import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
-import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
-import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
@@ -14,7 +12,6 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import love.simbot.example.BootAPIUse.API;
-import love.simbot.example.BootAPIUse.GeographyAPI.geoAPI;
 import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 
@@ -32,8 +29,6 @@ import java.util.concurrent.TimeUnit;
 @Beans
 public class PictureApiUse extends Constant {
 
-    public MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag1;
-    public MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag2;
 
     /**
      * 线程池
@@ -44,23 +39,12 @@ public class PictureApiUse extends Constant {
      * 获取当前时间
      */
     public TimeTranslate time = new TimeTranslate();
-    /**
-     * #@全体成员的猫猫码
-     */
-    public String cat1 = "[CAT:at,all=true]";
+
     /**
      * 调用API接口的类
      */
     public API api = new API();
-    /**
-     * 调用天气地理API接口的类
-     */
-    public geoAPI geoApi = new geoAPI();
-    /**
-     * 注入得到一个消息构建器工厂
-     */
-    @Depend
-    private MessageContentBuilderFactory messageBuilderFactory;
+
 
     /**
      * 二刺螈模块
@@ -72,8 +56,9 @@ public class PictureApiUse extends Constant {
     @OnGroup
     @Filter(value = "来点好康的", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void picture(GroupMsg groupMsg, MsgSender msgSender) {
+        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag1;
+        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag2;
 
-        Sender sender = msgSender.SENDER;
         Setter setter = msgSender.SETTER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
@@ -93,47 +78,55 @@ public class PictureApiUse extends Constant {
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
         if (!groupInfo.getGroupCode().equals(GROUPID3)) {
-            //sender.sendGroupMsg(groupMsg, url);
             try {
 
-
                 String img = util.toCat("image", true, "file=" + url);
+                String error = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
 
                 // 创建消息标记
-                this.flag1 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, imgMsg).get();
+                flag1 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, imgMsg).get();
 
                 // 创建消息标记
-                this.flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
+                flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
 
-
-//                // 创建延时消息
-//                THREAD_POOL.execute(() -> {
-//                    try {
-//                        // 线程休眠45秒
-//                        Thread.sleep(45000);
-//                        setter.setMsgRecall(flag1);
-//                        setter.setMsgRecall(flag2);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                });
-            } catch (Exception e) {
-                String img = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
-                msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face);
-                msgSender.SENDER.sendGroupMsg(groupMsg, img);
-
-            } finally {
-                // 创建延时消息
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> finalFlag = flag2;
                 THREAD_POOL.execute(() -> {
                     try {
                         // 线程休眠45秒
                         Thread.sleep(45000);
                         setter.setMsgRecall(flag1);
-                        setter.setMsgRecall(flag2);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        setter.setMsgRecall(finalFlag);
+                    } catch (Exception e) {
+                        // 没有图片时发送图片不见了并准备撤回
+                        // 创建消息标记
+                        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                                flag3 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + error).get();
+                        try {
+                            // 线程休眠45秒
+                            Thread.sleep(10000);
+                            setter.setMsgRecall(flag3);
+                        } catch (Exception e2) {
+                            System.out.println("报错");
+                        }
                     }
                 });
+
+            } catch (Exception e) {
+                String img = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
+
+                // 创建消息标记
+                flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + img).get();
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> finalFlag1 = flag2;
+                THREAD_POOL.execute(() -> {
+                    try {
+                        // 线程休眠45秒
+                        Thread.sleep(45000);
+                        setter.setMsgRecall(finalFlag1);
+                    } catch (InterruptedException e2) {
+                        msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + img);
+                    }
+                });
+
             }
         }
     }
