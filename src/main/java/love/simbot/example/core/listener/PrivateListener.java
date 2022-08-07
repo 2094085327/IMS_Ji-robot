@@ -162,8 +162,6 @@ public class PrivateListener extends Constant {
 
                 System.out.println(voice);
 
-//                sender.sendPrivateMsg(privateMsg, CatUtil.getRecord(file + "\\src\\main\\resources\\voicePack\\audio.wav").toString());
-//                api.record("红红火火恍恍惚惚");
                 sender.sendPrivateMsg(privateMsg, voice);
 
                 /**

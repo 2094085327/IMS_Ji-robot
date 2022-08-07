@@ -16,6 +16,7 @@ import love.simbot.example.core.listener.ClassBox.Constant;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * @author zeng
@@ -44,8 +45,9 @@ public class OtherApiUse extends Constant {
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+        if (groupBanId != 1) {
             sender.sendGroupMsg(groupMsg, api.YouthStudy());
 
         }
@@ -64,8 +66,9 @@ public class OtherApiUse extends Constant {
 
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+        if (groupBanId != 1) {
             sender.sendGroupMsg(groupMsg, api.bLive(BiUpUid));
         }
     }
@@ -85,8 +88,10 @@ public class OtherApiUse extends Constant {
 
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+        if (groupBanId != 1) {
             kedaya ke = new kedaya();
 
             OutputStream out = new FileOutputStream("C:\\Users\\86188\\Desktop\\simbot-mirai-demo1\\src\\main\\resources\\image\\" + 1 + ".gif");

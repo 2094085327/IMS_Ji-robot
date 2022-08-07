@@ -1,6 +1,5 @@
 package love.simbot.example.BootAPIUse.GeographyAPI;
 
-import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.FilterValue;
@@ -12,11 +11,9 @@ import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
-import love.simbot.example.BootAPIUse.API;
 import love.simbot.example.core.listener.ClassBox.Constant;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author zeng
@@ -31,8 +28,6 @@ public class GeographyApiUse extends Constant {
      */
     geoAPI geoApi = new geoAPI();
 
-    API api = new API();
-
     /**
      * 群聊天气查询模块
      * 在检测到关键词和命令后调用天气API来显示天气
@@ -45,10 +40,11 @@ public class GeographyApiUse extends Constant {
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
-        if (BOOTSTATE) {
-            Sender sender = msgSender.SENDER;
+        Sender sender = msgSender.SENDER;
+        GroupInfo groupInfo = groupMsg.getGroupInfo();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+        if (BOOTSTATE && groupBanId != 1) {
 
-            GroupInfo groupInfo = groupMsg.getGroupInfo();
             // 将群号为“637384877”的群排除在人工智能答复模块外.
             if (!groupInfo.getGroupCode().equals(GROUPID3)) {
                 if (city == null) {
@@ -106,8 +102,9 @@ public class GeographyApiUse extends Constant {
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+        if (groupBanId != 1) {
             if (city == null) {
                 sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
             } else {

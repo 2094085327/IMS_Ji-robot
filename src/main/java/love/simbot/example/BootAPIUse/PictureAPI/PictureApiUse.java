@@ -15,6 +15,7 @@ import love.simbot.example.BootAPIUse.API;
 import love.simbot.example.core.listener.ClassBox.Constant;
 import love.simbot.example.core.listener.ClassBox.TimeTranslate;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -63,6 +64,8 @@ public class PictureApiUse extends Constant {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
 
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String imgMsg = api.twoDimensional();
         String url = api.url;
@@ -77,7 +80,7 @@ public class PictureApiUse extends Constant {
 
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+        if (groupBanId != 1) {
             try {
 
                 String img = util.toCat("image", true, "file=" + url);
@@ -147,9 +150,10 @@ public class PictureApiUse extends Constant {
                 + "https://www.dmoe.cc/random.php");
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+            if (groupBanId != 1) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
@@ -199,9 +203,12 @@ public class PictureApiUse extends Constant {
         Sender sender = msgSender.SENDER;
         Setter setter = msgSender.SETTER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (!groupInfo.getGroupCode().equals(GROUPID3)) {
+            if (groupBanId != 1) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
