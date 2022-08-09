@@ -373,6 +373,7 @@ public class GroupListener extends Constant {
                 sender.sendGroupMsg(groupMsg, reMsg);
 
                 CatCodeUtil util = CatCodeUtil.INSTANCE;
+                // 获取项目路径
                 File file = new File(System.getProperty("user.dir"));
                 System.out.println(file);
                 String voice = util.toCat("voice", true, "file="

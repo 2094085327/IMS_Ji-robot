@@ -64,7 +64,7 @@ public class MyTast extends Constant {
         botSender.SENDER.sendGroupMsg("1043409458", img);
     }
 
-    //@Fixed(value = 30, timeUnit = TimeUnit.SECONDS)
+    @Fixed(value = 30, timeUnit = TimeUnit.SECONDS)
     public void BLive() {
         Bot bot = manager.getBot("341677404");
         BotSender botSender = bot.getSender();

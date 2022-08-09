@@ -154,6 +154,7 @@ public class PrivateListener extends Constant {
                 CatCodeUtil util = CatCodeUtil.INSTANCE;
                 sender.sendPrivateMsg(privateMsg, "嗨！");
 
+                // 项目路径
                 File file = new File(System.getProperty("user.dir"));
                 System.out.println(file);
                 String voice = util.toCat("voice", true, "file=" + api.record(msgs));
