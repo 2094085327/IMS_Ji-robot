@@ -104,6 +104,6 @@ fabric.properties
 
 !/监听记录.md
 !/群成员变更记录.md
-!/src/main/resources/simbot-bots/yourBot1.bot
 
+!/src/main/resources/simbot-bots/yourBot1.bot
 !/src/main/resources/simbot-bots/yourBot2.bot

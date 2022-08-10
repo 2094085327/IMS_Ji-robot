@@ -71,7 +71,7 @@ public class picture {
         BufferedImage withe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe.png"));
 
         //读取图片3
-        BufferedImage best = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\best.png"));
+        BufferedImage best = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\吉.png"));
 
         //读取图片4
         BufferedImage string1 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\string1.png"));
@@ -153,7 +153,7 @@ public class picture {
      * @param limited     限定在总五星中的比例(限定/总)
      * @throws IOException IO流异常
      */
-    public static void rolePole(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited) throws IOException {
+    public static void rolePole(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
         // 项目路径
         File file = new File(System.getProperty("user.dir"));
 
@@ -164,7 +164,7 @@ public class picture {
         //读取图片4
         BufferedImage string2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\string2.png"));
         //读取图片5
-        BufferedImage king = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\king.png"));
+        BufferedImage king = choseLuck(probability);
         //读取图片5
         BufferedImage countWithe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\计数块.png"));
 
@@ -195,14 +195,14 @@ public class picture {
         picArray = new BufferedImage[fivePeople.size()];
 
         for (String picName : fivePeople) {
-            File file1 = new File(file + "\\src\\main\\resources\\yuanImage\\" + picName + ".png");
+            File file1 = new File(file + "\\src\\main\\resources\\yuanImage\\角色图片\\" + picName + ".png");
             if (file1.exists()) {
                 //读取图片10
-                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\" + picName + ".png"));
+                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\角色图片\\" + picName + ".png"));
                 picArray[picTimes] = diLuKe;
             } else {
                 //读取图片10
-                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\default1.png"));
+                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\角色图片\\default1.png"));
                 picArray[picTimes] = diLuKe;
             }
             picTimes++;
@@ -221,6 +221,7 @@ public class picture {
         //用a创建绘画对象
         Graphics2D gd = withe2.createGraphics();
         //把图片e画上去
+        assert king != null;
         gd.drawImage(king, 58, 58, king.getWidth(), king.getHeight(), null);
         //把图片d画上去
         gd.drawImage(string2, 1112, 100, string2.getWidth(), string2.getHeight(), null);
@@ -276,6 +277,27 @@ public class picture {
 
     }
 
+    public static BufferedImage choseLuck(double probability) throws IOException {
+        // 项目路径
+        File file = new File(System.getProperty("user.dir"));
+        if (probability > 80 && probability <= 100) {
+            return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\欧.png"));
+        }
+        if (probability > 60 && probability <= 80) {
+            return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\吉.png"));
+        }
+        if (probability > 40 && probability <= 60) {
+            return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\平.png"));
+        }
+        if (probability > 20 && probability <= 40) {
+            return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\惨.png"));
+        }
+        if (probability >= 0 && probability <= 20) {
+            return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\寄.png"));
+        }
+        return null;
+    }
+
     /**
      * @param srcFile      源图片路径
      * @param targetFile   截好后图片全名
@@ -285,8 +307,7 @@ public class picture {
      * @param hight        截取的高
      * @throws Exception 异常
      */
-    public static void cutImage(String srcFile, String targetFile, int startAcross, int StartEndlong, int width,
-                                int hight) throws Exception {
+    public static void cutImage(String srcFile, String targetFile, int startAcross, int StartEndlong, int width, int hight) throws Exception {
         // 取得图片读入器
         Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName("jpg");
         ImageReader reader = readers.next();

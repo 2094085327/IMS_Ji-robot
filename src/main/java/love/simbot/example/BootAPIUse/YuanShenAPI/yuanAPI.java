@@ -205,13 +205,16 @@ public class yuanAPI {
         }
 
         String limited = fiveStar - guaranteedCount + "/" + fiveStar;
-        averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited);
+
+        float guaranteedP = (float) (fiveStar - guaranteedCount) / fiveStar;
+
+        averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited, guaranteedP);
         /*
          return "五星: " + fiveStar + " 次\n四星: " + fourStar + " 次\n三星: " + threeStar + " 次\n总计 " + count + " 抽\n\n" + averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited) + "\n\n五星角色 :\n" + fivePeople + "\n\n四星武器&角色 :\n" + fourPeople + "\n\n大保底次数: " + guaranteedCount + " 次\n\n" + mapMsg;
          */
     }
 
-    public static void averageGaCha(int all, int five, ArrayList<String> fivePeople, int alreadyCost, String limited) throws IOException {
+    public static void averageGaCha(int all, int five, ArrayList<String> fivePeople, int alreadyCost, String limited, float guaranteedP) throws IOException {
 
 
         // 记录：以(90-平均出金数)*50%+(不歪的几率*50%)
@@ -221,8 +224,11 @@ public class yuanAPI {
         float averageFiveCost = (float) (all / five) * 160;
         String averageFiveCostString = String.format("%.1f", averageFiveCost);
 
+        // 欧非判断公式
+        double probability = (1 - (averageFive / 90) + guaranteedP * 0.5) * 100;
+
         picture.allDataMake(averageFiveString, String.valueOf(all), String.valueOf(five));
-        picture.rolePole(averageFiveString, String.valueOf(all), fivePeople, String.valueOf(alreadyCost), limited);
+        picture.rolePole(averageFiveString, String.valueOf(all), fivePeople, String.valueOf(alreadyCost), limited, probability);
 
         picture.allPictureMake();
         //return "平均 " + averageFiveString + " 抽到一次五星\n每个五星花费 " + averageFiveCostString + " 原石";
