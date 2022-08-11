@@ -38,8 +38,33 @@ public class yuanAPI {
         return "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?" + splitUrl2;
     }
 
+    public static void params() {
+        // 常驻200 角色301 武器302
 
+        String page;
+        String size;
+        String end_id;
+
+
+    }
+
+    /**
+     * 对关键参数进行拼接
+     *
+     * @param key
+     * @param url   未拼接的链接
+     * @param times
+     * @param endId 结束图片的id
+     * @return
+     */
     public static String getUrl(String key, String url, int times, String endId) {
+        ArrayList<String> gachaTypeList = new ArrayList<>();
+        gachaTypeList.add("200");
+        gachaTypeList.add("301");
+        gachaTypeList.add("302");
+        for (String gachaType : gachaTypeList) {
+
+        }
         String urls = toUrl(url) + "&gacha_type=301&page=1&size=20&end_id=0";
         // 通过正则获取关键字
         Pattern pattern2 = Pattern.compile("([\\s\\S]*)" + key + "=([^&]*)" + "([\\s\\S]*)" + "end_id=");
@@ -219,7 +244,7 @@ public class yuanAPI {
 
         // 记录：以(90-平均出金数)*50%+(不歪的几率*50%)
 
-        float averageFive = (float) all / five;
+        float averageFive = (float) (all - alreadyCost) / five;
         String averageFiveString = String.format("%.1f", averageFive);
         float averageFiveCost = (float) (all / five) * 160;
         String averageFiveCostString = String.format("%.1f", averageFiveCost);
