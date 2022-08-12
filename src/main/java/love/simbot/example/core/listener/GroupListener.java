@@ -472,8 +472,6 @@ public class GroupListener extends Constant {
                     e.printStackTrace();
                 }
             });
-
-
         }
 
         if (groupInfo.getGroupCode().equals(GROUPID2)) {

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,9 @@ public class picture {
         //读取角色池图片
         BufferedImage rolePool = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\role pool.png"));
 
+        //读取武器池图片
+        BufferedImage armsPool = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\arms pool.png"));
+
         //用a创建绘画对象
         Graphics2D gd = backImg.createGraphics();
 
@@ -50,6 +54,9 @@ public class picture {
         gd.drawImage(allData, 100, 100, allData.getWidth(), allData.getHeight(), null);
         //把角色池画上去
         gd.drawImage(rolePool, 100, 1242, rolePool.getWidth(), rolePool.getHeight(), null);
+
+        //把武器池画上去
+        gd.drawImage(armsPool, 100, 1342 + rolePool.getHeight(), armsPool.getWidth(), armsPool.getHeight(), null);
 
         gd.dispose();
 
@@ -96,9 +103,9 @@ public class picture {
 
 
         //读取图片2
-        BufferedImage withe2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe2.png"));
+        // BufferedImage withe2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe2.png"));
 
-        withe2.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
+        // withe2.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
 
 
         gd.dispose();
@@ -279,6 +286,140 @@ public class picture {
 
     }
 
+    /**
+     * 生成武器池图片
+     *
+     * @param averageFive 每个五星平均花费的抽数
+     * @param all         总抽数
+     * @param fivePeoples 五星角色数
+     * @param alreadyCost 目前在池子中垫的抽数
+     * @param limited     限定在总五星中的比例(限定/总)
+     * @throws IOException IO流异常
+     */
+    public static void armsPole(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
+        // 项目路径
+        File file = new File(System.getProperty("user.dir"));
+
+        //读取图片2
+        BufferedImage withe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe.png"));
+
+        //读取图片4
+        BufferedImage string2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\string3.png"));
+        //读取图片5
+        BufferedImage king = choseLuck(probability);
+        //读取图片5
+        BufferedImage countWithe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\计数块.png"));
+
+        //读取图片1
+        ArrayList<String> fivePeople = new ArrayList<>();
+        ArrayList<String> fivePeopleCounts = new ArrayList<>();
+        // 取出ArrayList中存储的数据进行拼接
+        for (int i = 1; i < fivePeoples.size() - 1; i++) {
+            // 跳过奇数个防止重复
+            if (i % 2 != 0) {
+                fivePeople.add(fivePeoples.get(i));
+                if (i <= 17) {
+                    fivePeopleCounts.add(fivePeoples.get(i + 1));
+                }
+            }
+        }
+        // 当五星个数为偶数时需要额外补上最后一组数据
+        if ((fivePeoples.size()) % 2 != 0) {
+            fivePeopleCounts.add(fivePeoples.get(fivePeoples.size() - 1));
+        }
+        fivePeopleCounts.add("");
+//        // 当五星个数为偶数时需要额外补上最后一组数据
+//        if ((fivePeoples.size()) % 2 != 0) {
+//            fivePeople.add(fivePeoples.get(fivePeoples.size() - 2));
+//        }
+        int picTimes = 0;
+        BufferedImage[] picArray;
+        picArray = new BufferedImage[fivePeople.size()];
+
+        for (String picName : fivePeople) {
+            File file1 = new File(file + "\\src\\main\\resources\\yuanImage\\武器图片\\" + picName + ".png");
+            if (file1.exists()) {
+                //读取图片10
+                BufferedImage armsImg = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\武器图片\\" + picName + ".png"));
+                picArray[picTimes] = armsImg;
+            } else {
+                //读取图片10
+                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\default1.png"));
+                picArray[picTimes] = diLuKe;
+            }
+            picTimes++;
+        }
+
+
+        int fivePeopleCunt = fivePeople.size();
+
+        int lines = (int) Math.ceil((float) fivePeopleCunt / 7);
+
+        scaleImage(withe.getWidth(), withe.getHeight() + 506 * lines + 60 * lines);
+
+        //读取图片2
+        BufferedImage withe2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe2.png"));
+
+        //用a创建绘画对象
+        Graphics2D gd = withe2.createGraphics();
+        //把图片e画上去
+        assert king != null;
+        gd.drawImage(king, 58, 58, king.getWidth(), king.getHeight(), null);
+        //把图片d画上去
+        gd.drawImage(string2, 1112, 100, string2.getWidth(), string2.getHeight(), null);
+
+
+        //for (int n = 1; n <= lines; n++) {
+        int roleX = 58;
+        int n = 1;
+        int counts = 0;
+        int lineX = 1;
+        for (int i = 1; i < fivePeople.size() + 1; i++) {
+
+            //把角色画上去
+            gd.drawImage(picArray[i - 1], roleX + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 106 + (picArray[i - 1].getHeight() + 50) * (n - 1), picArray[i - 1].getWidth(), picArray[i - 1].getHeight(), null);
+
+            gd.drawImage(countWithe, roleX + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 482 + (picArray[i - 1].getHeight() + 50) * (n - 1), countWithe.getWidth(), countWithe.getHeight(), null);
+
+            // 设置画笔颜色为黑色
+            gd.setColor(new Color(89, 87, 87));
+            // 设置画笔字体样式为微软雅黑，斜体，文字大小为20px
+            gd.setFont(new Font("汉仪青云简", Font.ITALIC, 100));
+
+            gd.drawString(fivePeopleCounts.get(i - 1), roleX + 147 + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 575 + (picArray[i - 1].getHeight() + 50) * (n - 1));
+
+            roleX += 52;
+            counts++;
+            lineX++;
+            if ((float) counts / 7 == 1) {
+                n++;
+                counts = 0;
+                lineX = 1;
+                roleX = 58;
+            }
+
+        }
+
+        // 设置画笔颜色为黑色
+        gd.setColor(Color.BLACK);
+        // 设置画笔字体样式为微软雅黑，斜体，文字大小为20px
+        gd.setFont(new Font("微软雅黑", Font.ITALIC, 206));
+        gd.drawString(averageFive, 1218, 770);
+        gd.drawString(all, 1910, 770);
+        gd.drawString(limited, 2575, 770);
+
+        gd.setColor(new Color(255, 192, 0));
+        gd.setFont(new Font("微软雅黑", Font.ITALIC, 101));
+        gd.drawString(alreadyCost, 1336, 412);
+
+        gd.dispose();
+
+        //保存新图片
+        ImageIO.write(withe2, "png", new File(file + "\\src\\main\\resources\\yuanImage\\arms pool.png"));
+
+    }
+
+
     public static BufferedImage choseLuck(double probability) throws IOException {
         // 项目路径
         File file = new File(System.getProperty("user.dir"));
@@ -384,6 +525,7 @@ public class picture {
             int height_i = 0;
             int width_i = 0;
             for (int i = 0; i < images.length; i++) {
+
                 if (type == 1) {
                     ImageNew.setRGB(width_i, 0, images[i].getWidth(), newHeight, ImageArrays[i], 0, images[i].getWidth());
                     width_i += images[i].getWidth();
@@ -402,33 +544,27 @@ public class picture {
     }
 
     /**
-     * 对关键参数进行拼接
-     *
-     * @param key
-     * @param url   未拼接的链接
-     * @param times
-     * @param endId 结束图片的id
-     * @return
+     * @param gachaType 抽奖类型
+     * @param times     页数
+     * @return 返回抽卡信息
      */
-    public static String getUrl(String key, int times) {
-
-
-        ArrayList<String> gachaTypeList = new ArrayList<>();
-        gachaTypeList.add("200");
-        gachaTypeList.add("301");
-        gachaTypeList.add("302");
+    public static String getUrl(String gachaType, int times) {
 
         String urls = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?authkey_ver=1&sign_type=2&auth_appid=webview_gacha&init_type=301&gacha_id=d7d9d26fd678245ee04bec46b4bab7a8f5359c90&timestamp=1657669968&lang=zh-cn&device_type=pc&ext=%7b%22loc%22%3a%7b%22x%22%3a-3771.129638671875%2c%22y%22%3a250.9356231689453%2c%22z%22%3a-2365.77490234375%7d%2c%22platform%22%3a%22WinST%22%7d&game_version=CNRELWin2.8.0_R9182063_S9401797_D9464149&plat_type=pc&region=cn_gf01&authkey=6NQAMEZnyHZ%2bquGwCGVuf7qWCbVt4TmJFNZOZ9RMxfirpEOBaWEs%2fT44oYQuEqC4urJYtDv64aMZUm7Pd7%2f0XpgH5UCeyXV9tKFkUvIYLj8z%2bnstf%2fBZWoyaH%2fLMQTedVStVKtIuMQzPNLCs%2fW4MhsfM7q%2bkYYNtnvxbLKZ8PUJHQpYl6I%2faEc87p252KQLeNtdPcpwohMnIn6e92dnIOcflc%2bLGmSf3fpgrRhwGvqltRIi7JjdFDEp7yd9tA8ivyUTEnvYEyefxyzxmPv8vKyc69hbjBLxFeNOibO7xV27QNxjojpQ%2bBAVTq3GzQGxyNPjbwDeo4G22ODP5AW3%2bIHNaHAQXxhBk66nEGBL9A9onfghjgCf5mcRVZ%2fP5%2bo4yoM%2b4yd8NNwOfJc58Gj%2fvRAE4c6fEekNs0wLwp54Kj9HiZecSNnhCPrTac0Zi4Bkus98x%2fh83vgMjAfAGki1SYsDN18%2b6pGN05n8h9oMYKad%2fJqxnBOT0rgN2aLtl6%2bUWuJWBnjUr6IXZAqx0IiRnClefmMPIxMYRLl08lYTYFOYuP3I9aLMvDInIGddp4GzTuk31WIcCvJFr62kYz47OOR1VIAfu4iXSUoHhrogXzs5eudso1JAnHlhsVzy1437GFcFcI1pB5%2f4XxAn8FhOLbiX12iNzetG14ms0CY51Gv%2bZEfJR3RGGh0tib4WhGPRsfXs2%2bsPReMQ9Qd0X2jw0OZCj%2bVfZja%2fr1QYS9D%2bzXJTV5nAUyQBAAZCX%2bMNf81hPjNf5X5s3J785tXO%2fK%2fr%2f1HE%2bfNQr2DvpyLbbFXVSMUOIPn%2fh%2fhB42HeTpXaXobsLpOtUNASqBYdT%2bbF2JG2aRcU5kOdYV8WjPGb2YBc0wJDHzr1w4nej990ZdAhWUecOaZn0re%2fRol8TbSjlnam10ZpHLkXVlcUu9aE8TBYdViqbau1ACIrIJR1aExDW2D1UxdhmR2YqGd1OrT6EyhOFbzXl%2btpSh670ahgXgPnn4KBghGmnjzqfZyaBibdeFKK11nL8G6wpcrNNUOQTTyTS2LY4YqX9ujmM13XUSnXT3LQ6cGaj7RJoPVjKEnlWriMeeHExTiVCTL6SC1P5wHr0jfwquRK0ncBBwkzxGVUWol0aL8fu50Ch62C4TAug3cvnbYR1aW4nMqOUdqiNkh%2bBwdv6Smb8zUs70Ux%2blmukHJnMRzeABlSxa3XHwOWNgIMu1uExd0tm8yvCRgWaHDu302brf3vfcWj89tzmnVp94nwC2OGml8%2b3ChxBxpxe76Mkm2rLFr4QPEcPgynsuSPO%2fAw%2fD3nnhyiAuEuqekYw0SxincJS1qnMu6Sp%2f%2bqxmLdKeDKRVB6dK10hA6U7myo5jg%3d%3d&game_biz=hk4e_cn" + "&gacha_type=301&page=1&size=20&end_id=0";
         // 通过正则获取关键字
-        Pattern pattern2 = Pattern.compile("([\\s\\S]*)" + "gacha_type" + "=([^&]*)" + "([\\s\\S]*)" + key + "=([^&]*)" + "([\\s\\S]*)");
+        Pattern pattern2 = Pattern.compile("([\\s\\S]*)" + "gacha_type" + "=([^&]*)" + "([\\s\\S]*)" + "page=" + "([^&]*)" + "([\\s\\S]*)");
         Matcher matcher2 = pattern2.matcher(urls);
-        if (matcher2.find()) {
-            for (String gachaType : gachaTypeList) {
-                System.out.println(matcher2.group(1) + "gacha_type=" + gachaType + matcher2.group(3) + key + "=" + times + matcher2.group(5));
-            }
-            // 返回拼接后的api链接
 
+
+        if (matcher2.find()) {
+            String newUrl;
+            newUrl = matcher2.group(1) + "gacha_type=" + gachaType + matcher2.group(3) + "page=" + times + matcher2.group(5);
+
+            // 返回拼接后的api链接
+            System.out.println(newUrl);
+            return newUrl;
         }
+
         return null;
     }
 
@@ -441,7 +577,7 @@ public class picture {
 //
 //
 //        mergeImage2(files, 2, "C:\\Users\\86188\\Desktop\\simbot-mirai-demo1\\src\\main\\resources\\yuanImage\\sec3.jpg");
-        getUrl("page", 1);
+        getUrl("302", 1);
     }
 
 }
