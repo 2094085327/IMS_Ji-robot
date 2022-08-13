@@ -12,11 +12,7 @@ import love.simbot.example.core.listener.ClassBox.Constant;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author zeng
@@ -38,42 +34,67 @@ public class YuanShenApiUse extends Constant {
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         if (groupBanId != 1) {
 
-            String url = yuanAPI.toUrl(groupMsg.getMsg());
-            String urlCheckType = yuanAPI.checkApi(url);
+            String url = YuanApi.toUrl(groupMsg.getMsg());
+            String urlCheckType = YuanApi.checkApi(url);
             if (!"OK".equals(urlCheckType)) {
                 assert urlCheckType != null;
                 msgSender.SENDER.sendGroupMsg(groupMsg, urlCheckType);
             } else {
                 msgSender.SENDER.sendGroupMsg(groupMsg, "请耐心等待，正在分析中,大致需要30秒至一分钟(视抽卡数决定)");
+/**
+ CompletableFuture<String> feature1 = CompletableFuture.supplyAsync(() -> {
+ try {
+ yuanAPI.getGachaRoleInfo(url);
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
+ return "abc";
+ });
+ CompletableFuture<String> feature2 = CompletableFuture.supplyAsync(() -> {
+ try {
+ yuanAPI.getGachaArmsInfo(url);
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
+ return "def";
+ });
+ CompletableFuture<String> feature3 = CompletableFuture.supplyAsync(() -> {
+ try {
+ yuanAPI.getGachaPermanentInfo(url);
+ } catch (Exception e) {
+ e.printStackTrace();
+ }
+ return "hig";
+ });
 
-                CompletableFuture<String> feature1 = CompletableFuture.supplyAsync(() -> {
-                    try {
-                        yuanAPI.getGachaRoleInfo(url);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return "abc";
-                });
-                CompletableFuture<String> feature2 = CompletableFuture.supplyAsync(() -> {
-                    try {
-                        yuanAPI.getGachaArmsInfo(url);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return "def";
-                });
+ CompletableFuture<Void> totalFeature = CompletableFuture.allOf(feature1, feature2,feature3);
+ totalFeature.join();
+ String str1 = feature1.get();
+ String str2 = feature2.get();
+ String str3 = feature3.get();
+ List<String> stringList = Stream.of(feature1, feature2, feature3).map(CompletableFuture::join).collect(Collectors.toList());
+ System.out.println(stringList);
+ System.out.println(str1 + str2 + str3);
+ */
 
+                YuanApi.getGachaRoleInfo(url);
+                msgSender.SENDER.sendGroupMsg(groupMsg, "--角色池分析完成--");
 
-                CompletableFuture<Void> totalFeature = CompletableFuture.allOf(feature1, feature2);
-                totalFeature.join();
-                String str2 = feature2.get();
-                String str1 = feature1.get();
-                List<String> stringList = Stream.of(feature1, feature2).map(CompletableFuture::join).collect(Collectors.toList());
-                System.out.println(stringList);
-                System.out.println(str1 + str2);
+                YuanApi.getGachaArmsInfo(url);
+                msgSender.SENDER.sendGroupMsg(groupMsg, "--武器池分析完成--");
+
+                YuanApi.getGachaPermanentInfo(url);
+                msgSender.SENDER.sendGroupMsg(groupMsg, "--常驻池分析完成--");
+
+                YuanApi.allData1();
+
+                YuanApi.fincount = 0;
+                YuanApi.finFiveStar = 0;
+                YuanApi.finProbability = 0;
 
                 picture.allPictureMake();
-                msgSender.SENDER.sendGroupMsg(groupMsg, CatUtil.getImage(file + "\\src\\main\\resources\\yuanImage\\finally.jpg").toString());
+
+                msgSender.SENDER.sendGroupMsg(groupMsg, CatUtil.getImage(file + "\\src\\main\\resources\\yuanImage\\finally.png").toString());
 
             }
         }

@@ -102,10 +102,6 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-!/监听记录.md
-!/群成员变更记录.md
+/监听记录.md
+/群成员变更记录.md
 
-!/src/main/resources/simbot-bots/yourBot1.bot
-!/src/main/resources/simbot-bots/yourBot2.bot
-/src/main/resources/simbot-bots/yourBot2.bot
-/src/main/resources/simbot-bots/yourBot1.bot

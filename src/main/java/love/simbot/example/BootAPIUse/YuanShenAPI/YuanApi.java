@@ -16,8 +16,11 @@ import java.util.regex.Pattern;
  * @date 2022/8/6 18:17
  * @user 86188
  */
-public class yuanAPI extends YuanConstant {
+public class YuanApi extends YuanConstant {
 
+    public static double finProbability;
+    public static int finFiveStar;
+    public static float fincount;
 
     /**
      * 获取解析后的真实URL并加入参数
@@ -61,7 +64,7 @@ public class yuanAPI extends YuanConstant {
             // 返回拼接后的api链接
             return newUrl;
         }
-        return null;
+        return "";
     }
 
     /**
@@ -97,10 +100,6 @@ public class yuanAPI extends YuanConstant {
     public static void getGachaRoleInfo(String url) throws Exception {
         Robot r = new Robot();
 
-        // 3星个数
-        int threeStar = 0;
-        // 4星个数
-        int fourStar = 0;
         // 5星个数
         int fiveStar = 0;
         // 总抽数
@@ -117,20 +116,12 @@ public class yuanAPI extends YuanConstant {
 
         int alreadyCost = 0;
 
-        // 五星角色列表
-        ArrayList<String> fivePeople = new ArrayList<>();
-        // 四星角色列表
-        ArrayList<String> fourPeople = new ArrayList<>();
-
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
 
-        // 发送的五星列表
-        StringBuilder mapMsg = new StringBuilder();
-
         for (int i = 1; i <= 9999; i++) {
             // 接口URL地址
-            String urls = yuanAPI.getUrl(url, "301", i, endId);
+            String urls = YuanApi.getUrl(url, "301", i, endId);
 
             // 请求json数据
             String jsonStr = HttpUtil.get(urls);
@@ -154,7 +145,6 @@ public class yuanAPI extends YuanConstant {
             // 获取当前页最后一个数据的id以进行翻页
             endId = jsonArray.getJSONObject(length - 1).getString("id");
 
-
             // 对当前页20个数据进行遍历
             for (int j = 0; j < length; j++) {
                 fiveGachaCount += 1;
@@ -163,44 +153,32 @@ public class yuanAPI extends YuanConstant {
                 // 抽到的物品名
                 String name = jsonArray.getJSONObject(j).getString("name");
 
+                if ("5".equals(rankType)) {
 
-                switch (rankType) {
-                    case "3":
-                        // 3星
-                        threeStar += 1;
-                        break;
-                    case "4":
-                        // 4星
-                        fourStar += 1;
-                        fourPeople.add(name);
-                        break;
-                    case "5":
-                        if (fiveStar == 0) {
-                            mapMsg.append("已垫").append(": ").append(fiveGachaCount - 1).append(" 发\n\n");
-                            alreadyCost = fiveGachaCount - 1;
-                        }
+                    // 已经垫池子的抽数
+                    if (fiveStar == 0) {
+                        alreadyCost = fiveGachaCount - 1;
+                    }
 
-                        // 5星
-                        fiveStar += 1;
-                        fivePeople.add(name);
-                        if ("刻晴".equals(name) || "迪卢克".equals(name) || "七七".equals(name) || "琴".equals(name) || "莫娜".equals(name)) {
-                            guaranteedCount += 1;
+                    // 5星
+                    fiveStar += 1;
+                    if ("刻晴".equals(name) || "迪卢克".equals(name) || "七七".equals(name) || "琴".equals(name) || "莫娜".equals(name)) {
+                        guaranteedCount += 1;
 
-                            // 将歪的角色的抽数与姓名加入list
-                            fivePeopleCount.add(String.valueOf(fiveGachaCount));
-                            fivePeopleCount.add(name + "(歪)");
+                        // 将歪的角色的抽数与姓名加入list
+                        fivePeopleCount.add(String.valueOf(fiveGachaCount));
+                        fivePeopleCount.add(name + "(歪)");
 
-                        } else {
+                    } else {
 
-                            // 没歪的角色姓名与抽数
-                            fivePeopleCount.add(String.valueOf(fiveGachaCount));
-                            fivePeopleCount.add(name);
+                        // 没歪的角色姓名与抽数
+                        fivePeopleCount.add(String.valueOf(fiveGachaCount));
+                        fivePeopleCount.add(name);
 
-                        }
-                        // 将五星计数归零
-                        fiveGachaCount = 0;
+                    }
+                    // 将五星计数归零
+                    fiveGachaCount = 0;
 
-                    default:
                 }
 
             }
@@ -208,18 +186,6 @@ public class yuanAPI extends YuanConstant {
             r.delay(500);
         }
         fivePeopleCount.add(String.valueOf(fiveGachaCount));
-
-        // 取出ArrayList中存储的数据进行拼接
-        for (int m = 0; m < fivePeopleCount.size() - 2; m++) {
-            // 跳过奇数个防止重复
-            if (m % 2 != 1) {
-                mapMsg.append(fivePeopleCount.get(m + 1)).append(": ").append(fivePeopleCount.get(m + 2)).append(" 发\n\n");
-            }
-        }
-        // 当五星个数为偶数时需要额外补上最后一组数据
-        if ((fivePeopleCount.size()) % 2 == 0) {
-            mapMsg.append(fivePeopleCount.get(fivePeopleCount.size() - 2)).append(": ").append(fivePeopleCount.get(fivePeopleCount.size() - 1)).append(" 发");
-        }
 
         String limited = fiveStar - guaranteedCount + "/" + fiveStar;
 
@@ -233,15 +199,13 @@ public class yuanAPI extends YuanConstant {
         // 欧非判断公式 以(1-平均出金数/90)*50%+(不歪的几率*50%) 作为概率
         double probability = (1 - (averageFive / 90) + guaranteedP * 0.5) * 100;
 
-        // averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited, guaranteedP);
-
-        picture.allDataMake(averageFiveString, String.valueOf(count), String.valueOf(fiveStar));
+        fincount += count;
+        finFiveStar += fiveStar;
+        finProbability += probability * 0.33;
 
         picture.rolePole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
-        /*
-         return "五星: " + fiveStar + " 次\n四星: " + fourStar + " 次\n三星: " + threeStar + " 次\n总计 " + count + " 抽\n\n" + averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited) + "\n\n五星角色 :\n" + fivePeople + "\n\n四星武器&角色 :\n" + fourPeople + "\n\n大保底次数: " + guaranteedCount + " 次\n\n" + mapMsg;
-         */
+        System.out.println("——角色池完成——");
     }
 
 
@@ -258,14 +222,8 @@ public class yuanAPI extends YuanConstant {
 
         int alreadyCost = 0;
 
-        // 发送的五星列表
-        StringBuilder mapMsg = new StringBuilder();
-
         // 5星个数
         int fiveStar = 0;
-
-        // 五星角色列表
-        ArrayList<String> fivePeople = new ArrayList<>();
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
@@ -273,7 +231,6 @@ public class yuanAPI extends YuanConstant {
         for (int i = 1; i < 9999; i++) {
             String newUrl = getUrl(url, "302", i, endId);
             // 请求json数据
-            assert newUrl != null;
             String jsonStr = HttpUtil.get(newUrl);
             JSONObject jsonObject = JSONObject.fromObject(jsonStr);
             JSONObject data = jsonObject.getJSONObject("data");
@@ -308,13 +265,12 @@ public class yuanAPI extends YuanConstant {
                 if ("5".equals(rankType)) {
 
                     if (fiveStar == 0) {
-                        mapMsg.append("已垫").append(": ").append(fiveGachaCount - 1).append(" 发\n\n");
                         alreadyCost = fiveGachaCount - 1;
                     }
 
                     // 5星
                     fiveStar += 1;
-                    fivePeople.add(name);
+
                     int banArms = (int) Arrays.stream(gachaArmsInfo).filter(name::contains).count();
                     if (banArms == 1) {
                         guaranteedCount += 1;
@@ -339,19 +295,8 @@ public class yuanAPI extends YuanConstant {
         }
         fivePeopleCount.add(String.valueOf(fiveGachaCount));
 
-        // 取出ArrayList中存储的数据进行拼接
-        for (int m = 0; m < fivePeopleCount.size() - 2; m++) {
-            // 跳过奇数个防止重复
-            if (m % 2 != 1) {
-                mapMsg.append(fivePeopleCount.get(m + 1)).append(": ").append(fivePeopleCount.get(m + 2)).append(" 发\n\n");
-            }
-        }
-        // 当五星个数为偶数时需要额外补上最后一组数据
-        if ((fivePeopleCount.size()) % 2 == 0) {
-            mapMsg.append(fivePeopleCount.get(fivePeopleCount.size() - 2)).append(": ").append(fivePeopleCount.get(fivePeopleCount.size() - 1)).append(" 发");
-        }
-
         String limited = fiveStar - guaranteedCount + "/" + fiveStar;
+
 
         // 小保底概率
         float guaranteedP = (float) (fiveStar - guaranteedCount) / fiveStar;
@@ -362,32 +307,115 @@ public class yuanAPI extends YuanConstant {
 
         // 欧非判断公式 以(1-平均出金数/90)+(不歪的几率*50%) 作为概率
         double probability = (1 - (averageFive / 80) + guaranteedP * 0.5) * 100;
-        //averageGaCha(count, fiveStar, fivePeopleCount, alreadyCost, limited, guaranteedP);
 
         picture.armsPole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
+        fincount += count;
+        finFiveStar += fiveStar;
+        finProbability += probability * 0.33;
 
-        System.out.println("五星: " + fiveStar + " 次 " + "\n总计 " + count + " 抽\n\n五星武器 :\n" + fivePeople + "\n\n大保底次数: " + guaranteedCount + " 次\n\n");
+        System.out.println("——武器池完成——");
     }
 
-    public static void averageGaCha(int all, int five, ArrayList<String> fivePeople, int alreadyCost, String limited, float guaranteedP) throws IOException {
-//
-//        // 记录：以(1-平均出金数/90)*50%+(不歪的几率*50%)
-//
-//        float averageFive = (float) (all - alreadyCost) / five;
-//        String averageFiveString = String.format("%.1f", averageFive);
-//
-//        // 欧非判断公式
-//        double probability = (1 - (averageFive / 90) + guaranteedP * 0.5) * 100;
-//
-//        picture.allDataMake(averageFiveString, String.valueOf(all), String.valueOf(five));
-//
-//        picture.rolePole(averageFiveString, String.valueOf(all), fivePeople, String.valueOf(alreadyCost), limited, probability);
-//
-//        picture.armsPole(averageFiveString, String.valueOf(all), fivePeople, String.valueOf(alreadyCost), limited, probability);
-//
+    public static void getGachaPermanentInfo(String url) throws Exception {
+        Robot r = new Robot();
 
-//        //return "平均 " + averageFiveString + " 抽到一次五星\n每个五星花费 " + averageFiveCostString + " 原石";
+        String endId = "0";
+        int count = 0;
+
+        // 至五星为止的次数
+        int fiveGachaCount = 0;
+
+        int alreadyCost = 0;
+
+        // 5星个数
+        int fiveStar = 0;
+
+
+        // 五星角色与对应抽数
+        ArrayList<String> fivePeopleCount = new ArrayList<>();
+
+        for (int i = 1; i < 9999; i++) {
+            String newUrl = getUrl(url, "200", i, endId);
+
+            // 请求json数据
+            String jsonStr = HttpUtil.get(newUrl);
+            JSONObject jsonObject = JSONObject.fromObject(jsonStr);
+            JSONObject data = jsonObject.getJSONObject("data");
+
+            // 创建list数组
+            String list = data.getString("list");
+            JSONArray jsonArray;
+            jsonArray = new JSONArray(list);
+            // 数组长度
+            int length = jsonArray.length();
+            // 总抽数
+            count += length;
+
+            // 当数组长度为0时(即没有抽卡记录时)跳出循环
+            if (length < 1) {
+                break;
+            }
+
+            // 获取当前页最后一个数据的id以进行翻页
+            endId = jsonArray.getJSONObject(length - 1).getString("id");
+
+            // 对当前页20个数据进行遍历
+            for (int j = 0; j < length; j++) {
+                fiveGachaCount += 1;
+                // 抽卡等级
+                String rankType = jsonArray.getJSONObject(j).getString("rank_type");
+                // 抽到的物品名
+                String name = jsonArray.getJSONObject(j).getString("name");
+
+
+                if ("5".equals(rankType)) {
+
+                    if (fiveStar == 0) {
+                        alreadyCost = fiveGachaCount - 1;
+                    }
+
+                    // 5星
+                    fiveStar += 1;
+
+                    // 将歪的角色的抽数与姓名加入list
+                    fivePeopleCount.add(String.valueOf(fiveGachaCount));
+                    fivePeopleCount.add(name + "(歪)");
+
+                    // 将五星计数归零
+                    fiveGachaCount = 0;
+                }
+            }
+            r.delay(500);
+            // 延迟500ms避免被ban
+        }
+        fivePeopleCount.add(String.valueOf(fiveGachaCount));
+
+        // 每个五星平均花费
+        float averageFive = (float) (count - alreadyCost - fiveStar) / fiveStar;
+        String averageFiveString = String.format("%.1f", averageFive);
+
+        // 欧非判断公式
+        double probability = (1 - (averageFive / 90)) * 100;
+
+        picture.permanentPool(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), String.valueOf(fiveStar), probability);
+
+        fincount += count;
+        finFiveStar += fiveStar;
+        finProbability += probability * 0.33;
+
+        System.out.println("——常驻池完成——");
+
     }
+
+
+    public static void allData1() throws IOException {
+
+        String aveFive = String.format("%.1f", (fincount - finFiveStar) / finFiveStar);
+        System.out.println(aveFive);
+        picture.allDataMake(aveFive, String.valueOf(String.format("%.0f", fincount)), String.valueOf(finFiveStar), finProbability);
+
+    }
+
 }
 

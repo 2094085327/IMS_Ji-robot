@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +34,6 @@ public class picture {
         // 项目路径
         File file = new File(System.getProperty("user.dir"));
 
-        //读取背景图片
-        BufferedImage backImg = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\sec3.jpg"));
-
         //读取总数据图片
         BufferedImage allData = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\allData.png"));
 
@@ -46,6 +42,32 @@ public class picture {
 
         //读取武器池图片
         BufferedImage armsPool = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\arms pool.png"));
+
+        //读取常驻池图片
+        BufferedImage PermanentPool = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\permanent pool.png"));
+
+
+        ImageIcon sec = new ImageIcon(file + "\\src\\main\\resources\\yuanImage\\sec3.png");
+
+        BufferedImage bi = new BufferedImage(3305, 500 + allData.getHeight() + rolePool.getHeight() + armsPool.getHeight() + PermanentPool.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = bi.createGraphics();
+
+        // 设置图片品质
+        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
+
+        System.out.println(allData.getHeight());
+        System.out.println(rolePool.getHeight());
+        System.out.println(armsPool.getHeight());
+        System.out.println(PermanentPool.getHeight());
+
+        g2d.drawImage(sec.getImage(), 0, 0, 3305, 500 + allData.getHeight() + rolePool.getHeight() + armsPool.getHeight() + PermanentPool.getHeight(), null);
+        g2d.dispose();
+        ImageIO.write(bi, "png", new File(file + "\\src\\main\\resources\\yuanImage\\sec1.png"));
+
+
+        //读取总数据图片
+        BufferedImage backImg = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\sec1.png"));
 
         //用a创建绘画对象
         Graphics2D gd = backImg.createGraphics();
@@ -58,10 +80,13 @@ public class picture {
         //把武器池画上去
         gd.drawImage(armsPool, 100, 1342 + rolePool.getHeight(), armsPool.getWidth(), armsPool.getHeight(), null);
 
+        //把常驻池画上去
+        gd.drawImage(PermanentPool, 100, 1442 + rolePool.getHeight() + armsPool.getHeight(), PermanentPool.getWidth(), PermanentPool.getHeight(), null);
+
         gd.dispose();
 
         //保存新图片
-        ImageIO.write(backImg, "jpg", new File(file + "\\src\\main\\resources\\yuanImage\\finally.jpg"));
+        ImageIO.write(backImg, "png", new File(file + "\\src\\main\\resources\\yuanImage\\finally.png"));
     }
 
     /**
@@ -72,15 +97,16 @@ public class picture {
      * @param five        五星个数
      * @throws IOException IO流异常
      */
-    public static void allDataMake(String averageFive, String all, String five) throws IOException {
+    public static void allDataMake(String averageFive, String all, String five, double probability) throws IOException {
         // 项目路径
         File file = new File(System.getProperty("user.dir"));
 
         //读取图片2
         BufferedImage withe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe.png"));
 
-        //读取图片3
-        BufferedImage best = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\吉.png"));
+
+        //读取图片5
+        BufferedImage king = choseLuck(probability);
 
         //读取图片4
         BufferedImage string1 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\string1.png"));
@@ -89,7 +115,8 @@ public class picture {
         Graphics2D gd = withe.createGraphics();
 
         //把图片c画上去
-        gd.drawImage(best, 58, 58, best.getWidth(), best.getHeight(), null);
+        assert king != null;
+        gd.drawImage(king, 58, 58, king.getWidth(), king.getHeight(), null);
         //把图片d画上去
         gd.drawImage(string1, 1112, 100, string1.getWidth(), string1.getHeight(), null);
 
@@ -420,22 +447,153 @@ public class picture {
     }
 
 
+    /**
+     * 生成常驻池图片
+     *
+     * @param averageFive 每个五星平均花费的抽数
+     * @param all         总抽数
+     * @param fivePeoples 五星角色数
+     * @param alreadyCost 目前在池子中垫的抽数
+     * @param limited     限定在总五星中的比例(限定/总)
+     * @throws IOException IO流异常
+     */
+    public static void permanentPool(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
+        // 项目路径
+        File file = new File(System.getProperty("user.dir"));
+
+        //读取图片2
+        BufferedImage withe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\pwithe.png"));
+
+        //读取图片4
+        BufferedImage string2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\string4.png"));
+        //读取图片5
+        BufferedImage king = choseLuck(probability);
+        //读取图片5
+        BufferedImage countWithe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\计数块2.png"));
+
+        //读取图片1
+        ArrayList<String> fivePeople = new ArrayList<>();
+        ArrayList<String> fivePeopleCounts = new ArrayList<>();
+        // 取出ArrayList中存储的数据进行拼接
+        for (int i = 1; i < fivePeoples.size() - 1; i++) {
+            // 跳过奇数个防止重复
+            if (i % 2 != 0) {
+                fivePeople.add(fivePeoples.get(i));
+                if (i <= 17) {
+                    fivePeopleCounts.add(fivePeoples.get(i + 1));
+                }
+            }
+        }
+        // 当五星个数为偶数时需要额外补上最后一组数据
+        if ((fivePeoples.size()) % 2 != 0) {
+            fivePeopleCounts.add(fivePeoples.get(fivePeoples.size() - 1));
+        }
+        fivePeopleCounts.add("");
+
+        int picTimes = 0;
+        BufferedImage[] picArray;
+        picArray = new BufferedImage[fivePeople.size()];
+
+        for (String picName : fivePeople) {
+            File file1 = new File(file + "\\src\\main\\resources\\yuanImage\\常驻图片\\" + picName + ".png");
+            if (file1.exists()) {
+                //读取图片10
+                BufferedImage armsImg = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\常驻图片\\" + picName + ".png"));
+                picArray[picTimes] = armsImg;
+            } else {
+                //读取图片10
+                BufferedImage diLuKe = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\default1.png"));
+                picArray[picTimes] = diLuKe;
+            }
+            picTimes++;
+        }
+
+        int fivePeopleCunt = fivePeople.size();
+
+        int lines = (int) Math.ceil((float) fivePeopleCunt / 7);
+
+        scaleImage(withe.getWidth(), withe.getHeight() + 506 * lines + 60 * lines);
+
+        //读取图片2
+        BufferedImage withe2 = ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\withe2.png"));
+
+
+        //用a创建绘画对象
+        Graphics2D gd = withe2.createGraphics();
+        //把图片e画上去
+        assert king != null;
+        gd.drawImage(king, 58, 58, king.getWidth(), king.getHeight(), null);
+        //把图片d画上去
+        gd.drawImage(string2, 1112, 100, string2.getWidth(), string2.getHeight(), null);
+
+
+        //for (int n = 1; n <= lines; n++) {
+        int roleX = 58;
+        int n = 1;
+        int counts = 0;
+        int lineX = 1;
+        for (int i = 1; i < fivePeople.size() + 1; i++) {
+
+            //把角色画上去
+            gd.drawImage(picArray[i - 1], roleX + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 106 + (picArray[i - 1].getHeight() + 50) * (n - 1), picArray[i - 1].getWidth(), picArray[i - 1].getHeight(), null);
+
+            gd.drawImage(countWithe, roleX + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 482 + (picArray[i - 1].getHeight() + 50) * (n - 1), countWithe.getWidth(), countWithe.getHeight(), null);
+
+            // 设置画笔颜色为黑色
+            gd.setColor(new Color(89, 87, 87));
+            // 设置画笔字体样式为微软雅黑，斜体，文字大小为20px
+            gd.setFont(new Font("汉仪青云简", Font.ITALIC, 100));
+
+            gd.drawString(fivePeopleCounts.get(i - 1), roleX + 147 + picArray[i - 1].getWidth() * (lineX - 1), king.getHeight() + 575 + (picArray[i - 1].getHeight() + 50) * (n - 1));
+
+            roleX += 52;
+            counts++;
+            lineX++;
+            if ((float) counts / 7 == 1) {
+                n++;
+                counts = 0;
+                lineX = 1;
+                roleX = 58;
+            }
+
+        }
+
+        // 设置画笔颜色为黑色
+        gd.setColor(Color.BLACK);
+        // 设置画笔字体样式为微软雅黑，斜体，文字大小为20px
+        gd.setFont(new Font("微软雅黑", Font.ITALIC, 206));
+        gd.drawString(averageFive, 1218, 770);
+        gd.drawString(all, 1910, 770);
+        gd.drawString(limited, 2575, 770);
+
+        gd.setColor(new Color(255, 192, 0));
+        gd.setFont(new Font("微软雅黑", Font.ITALIC, 101));
+        gd.drawString(alreadyCost, 1336, 412);
+
+        gd.dispose();
+
+        //保存新图片
+        ImageIO.write(withe2, "png", new File(file + "\\src\\main\\resources\\yuanImage\\permanent pool.png"));
+
+    }
+
+
     public static BufferedImage choseLuck(double probability) throws IOException {
         // 项目路径
         File file = new File(System.getProperty("user.dir"));
-        if (probability > 80 && probability <= 100) {
+        if (probability > 80) {
             return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\欧.png"));
         }
-        if (probability > 60 && probability <= 80) {
+        if (probability > 60) {
             return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\吉.png"));
         }
-        if (probability > 40 && probability <= 60) {
+        if (probability > 40) {
             return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\平.png"));
         }
-        if (probability > 20 && probability <= 40) {
+        if (probability > 20) {
             return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\惨.png"));
         }
-        if (probability >= 0 && probability <= 20) {
+        if (probability >= 0) {
             return ImageIO.read(new File(file + "\\src\\main\\resources\\yuanImage\\运气\\寄.png"));
         }
         return null;
